@@ -1,9 +1,8 @@
 package ai.labs.eddi.engine.internal;
 
-import ai.labs.eddi.engine.model.Deployment;
-import jakarta.enterprise.context.ApplicationScoped;
-import org.jboss.logging.MDC;
+import ai.labs.eddi.models.Deployment;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,19 +32,6 @@ public class ContextLogger implements IContextLogger {
 
     @Override
     public void setLoggingContext(Map<String, String> loggingContext) {
-        setLoggingContextValues(loggingContext);
-    }
-
-    @Override
-    public void clearLoggingContext() {
-        MDC.clear();
-    }
-
-    private static void setLoggingContextValues(Map<String, String> loggingContext) {
-        if (loggingContext != null) {
-            for (Map.Entry<String, String> entry : loggingContext.entrySet()) {
-                MDC.put(entry.getKey(), entry.getValue());
-            }
-        }
+        //todo MDC.setContextMap(loggingContext);
     }
 }

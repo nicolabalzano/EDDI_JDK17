@@ -80,11 +80,11 @@ public class BehaviorDeserialization implements IBehaviorDeserialization {
                                     behaviorRule.setConditions(convert(behaviorRuleJson.getConditions(), behaviorSet));
                                     return behaviorRule;
                                 }
-                        ).toList());
+                        ).collect(Collectors.toList()));
 
                         return behaviorGroup;
                     }
-            ).toList());
+            ).collect(Collectors.toList()));
 
             return behaviorSet;
         } catch (IOException e) {
@@ -132,19 +132,28 @@ public class BehaviorDeserialization implements IBehaviorDeserialization {
     }
 
     private IBehaviorCondition createCondition(String conditionsKey) {
-        return switch (conditionsKey) {
-            case CONDITION_PREFIX + InputMatcher.ID -> new InputMatcher(expressionProvider);
-            case CONDITION_PREFIX + ActionMatcher.ID -> new ActionMatcher();
-            case CONDITION_PREFIX + Connector.ID -> new Connector();
-            case CONDITION_PREFIX + Negation.ID -> new Negation();
-            case CONDITION_PREFIX + ContextMatcher.ID -> new ContextMatcher(expressionProvider, jsonSerialization);
-            case CONDITION_PREFIX + Occurrence.ID -> new Occurrence();
-            case CONDITION_PREFIX + DynamicValueMatcher.ID -> new DynamicValueMatcher(memoryItemConverter);
-            case CONDITION_PREFIX + SizeMatcher.ID -> new SizeMatcher(memoryItemConverter);
-            case CONDITION_PREFIX + Dependency.ID -> new Dependency();
-            default -> null;
-        };
+        switch (conditionsKey) {
+            case CONDITION_PREFIX + InputMatcher.ID:
+                return new InputMatcher(expressionProvider);
+            case CONDITION_PREFIX + ActionMatcher.ID:
+                return new ActionMatcher();
+            case CONDITION_PREFIX + Connector.ID:
+                return new Connector();
+            case CONDITION_PREFIX + Negation.ID:
+                return new Negation();
+            case CONDITION_PREFIX + ContextMatcher.ID:
+                return new ContextMatcher(expressionProvider, jsonSerialization);
+            case CONDITION_PREFIX + Occurrence.ID:
+                return new Occurrence();
+            case CONDITION_PREFIX + DynamicValueMatcher.ID:
+                return new DynamicValueMatcher(memoryItemConverter);
+            case CONDITION_PREFIX + SizeMatcher.ID:
+                return new SizeMatcher(memoryItemConverter);
+            case CONDITION_PREFIX + Dependency.ID:
+                return new Dependency();
+        }
 
+        return null;
     }
 
     private List<IBehaviorCondition> deepCopy(List<IBehaviorCondition> behaviorConditionList)

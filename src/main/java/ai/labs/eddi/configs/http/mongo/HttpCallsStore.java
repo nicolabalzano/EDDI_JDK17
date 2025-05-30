@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @ApplicationScoped
 public class HttpCallsStore implements IHttpCallsStore {
-    private final HistorizedResourceStore<HttpCallsConfiguration> httpCallsResourceStore;
+    private HistorizedResourceStore<HttpCallsConfiguration> httpCallsResourceStore;
 
     @Inject
     public HttpCallsStore(MongoDatabase database, IDocumentBuilder documentBuilder) {

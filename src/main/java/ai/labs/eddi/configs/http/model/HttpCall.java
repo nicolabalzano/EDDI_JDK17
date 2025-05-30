@@ -16,7 +16,7 @@ public class HttpCall {
     private Boolean fireAndForget = false;
     private Boolean isBatchCalls = false;
     private String iterationObjectName;
-    private HttpPreRequest preRequest;
+    private PreRequest preRequest;
     private Request request;
-    private HttpPostResponse postResponse;
+    private PostResponse postResponse;
 }

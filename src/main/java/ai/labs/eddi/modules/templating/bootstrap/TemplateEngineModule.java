@@ -5,22 +5,21 @@ import ai.labs.eddi.engine.lifecycle.bootstrap.LifecycleExtensions;
 import ai.labs.eddi.modules.templating.OutputTemplateTask;
 import ai.labs.eddi.modules.templating.impl.HtmlTemplateEngine;
 import ai.labs.eddi.modules.templating.impl.JavaScriptTemplateEngine;
+import ai.labs.eddi.modules.templating.impl.JsonSerializationThymeleafDialect;
 import ai.labs.eddi.modules.templating.impl.TextTemplateEngine;
-import ai.labs.eddi.modules.templating.impl.dialects.encoding.EncoderDialect;
-import ai.labs.eddi.modules.templating.impl.dialects.json.JsonDialect;
-import ai.labs.eddi.modules.templating.impl.dialects.uuid.UUIDDialect;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.runtime.Startup;
+import org.jboss.logging.Logger;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.StringTemplateResolver;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import org.jboss.logging.Logger;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.StringTemplateResolver;
-
 import java.util.Map;
 
 /**
@@ -29,6 +28,7 @@ import java.util.Map;
 @Startup(1000)
 @ApplicationScoped
 public class TemplateEngineModule {
+
     private static final Logger LOGGER = Logger.getLogger("Startup");
     private final Map<String, Provider<ILifecycleTask>> lifecycleTaskProviders;
     private final Instance<ILifecycleTask> instance;
@@ -48,31 +48,28 @@ public class TemplateEngineModule {
 
     @ApplicationScoped
     @Produces
-    public TextTemplateEngine provideTextTemplateEngine() {
-        return new TextTemplateEngine(createTemplateEngine(TemplateMode.TEXT));
+    public TextTemplateEngine provideTextTemplateEngine(ObjectMapper objectMapper) {
+        return new TextTemplateEngine(createTemplateEngine(TemplateMode.TEXT, objectMapper));
     }
 
     @ApplicationScoped
     @Produces
-    public HtmlTemplateEngine provideHtmlTemplateEngine() {
-        return new HtmlTemplateEngine(createTemplateEngine(TemplateMode.HTML));
+    public HtmlTemplateEngine provideHtmlTemplateEngine(ObjectMapper objectMapper) {
+        return new HtmlTemplateEngine(createTemplateEngine(TemplateMode.HTML, objectMapper));
     }
 
     @ApplicationScoped
     @Produces
-    public JavaScriptTemplateEngine provideJavaScriptTemplateEngine() {
-        return new JavaScriptTemplateEngine(createTemplateEngine(TemplateMode.JAVASCRIPT));
+    public JavaScriptTemplateEngine provideJavaScriptTemplateEngine(ObjectMapper objectMapper) {
+        return new JavaScriptTemplateEngine(createTemplateEngine(TemplateMode.JAVASCRIPT, objectMapper));
     }
 
-    private TemplateEngine createTemplateEngine(TemplateMode templateMode) {
-        var templateResolver = new StringTemplateResolver();
+    private TemplateEngine createTemplateEngine(TemplateMode templateMode, ObjectMapper objectMapper) {
+        TemplateEngine templateEngine = new TemplateEngine();
+        templateEngine.addDialect(new JsonSerializationThymeleafDialect(objectMapper));
+        StringTemplateResolver templateResolver = new StringTemplateResolver();
         templateResolver.setTemplateMode(templateMode);
-
-        var templateEngine = new TemplateEngine();
         templateEngine.addTemplateResolver(templateResolver);
-        templateEngine.addDialect(new UUIDDialect());
-        templateEngine.addDialect(new JsonDialect());
-        templateEngine.addDialect(new EncoderDialect());
 
         return templateEngine;
     }

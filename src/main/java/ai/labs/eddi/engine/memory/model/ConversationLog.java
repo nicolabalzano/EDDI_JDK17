@@ -11,17 +11,17 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class ConversationLog {
     private List<ConversationPart> messages = new LinkedList<>();
 
-    @Override
-    public String toString() {
+    public String getConversationLogAsString() {
         return messages.
                 stream().map(part -> part.getRole() + ": " + part.getContent()).
                 collect(Collectors.joining("\n"));
     }
 
-    public Object toObject() {
+    public Object getConversationLogAsObject() {
         return messages;
     }
 
@@ -33,25 +33,6 @@ public class ConversationLog {
     @ToString
     public static class ConversationPart {
         private String role;
-        private List<Content> content;
-
-        @Getter
-        @Setter
-        @NoArgsConstructor
-        @AllArgsConstructor
-        @EqualsAndHashCode
-        @ToString
-        public static class Content {
-            private ContentType type;
-            private String value;
-        }
-
-        public enum ContentType {
-            text,
-            image,
-            pdf,
-            audio,
-            video
-        }
+        private String content;
     }
 }

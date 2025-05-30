@@ -82,7 +82,6 @@ public class ZipArchive implements IZipArchive {
         // iterates over entries in the zip file
         while (entry != null) {
             String filePath = targetDir.getPath() + File.separator + entry.getName();
-            
             if (!entry.isDirectory()) {
                 // if the entry is a file, extracts it
                 new File(filePath).getParentFile().mkdirs();

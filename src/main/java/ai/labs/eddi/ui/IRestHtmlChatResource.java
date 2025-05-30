@@ -8,7 +8,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.jboss.resteasy.reactive.Cache;
 
 /**
  * @author ginccc
@@ -20,11 +19,9 @@ import org.jboss.resteasy.reactive.Cache;
 public interface IRestHtmlChatResource {
 
     @GET
-    @Cache(noCache = true)
     Response viewDefault();
 
     @GET
-    @Cache(noCache = true)
     @Path("{path:.*}")
     Response viewHtml(@PathParam("path") String path);
 }

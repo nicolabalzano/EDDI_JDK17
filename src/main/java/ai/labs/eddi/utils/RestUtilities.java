@@ -1,11 +1,11 @@
 package ai.labs.eddi.utils;
 
 import ai.labs.eddi.datastore.IResourceStore;
-import jakarta.ws.rs.WebApplicationException;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
+
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.jboss.resteasy.reactive.server.jaxrs.ResponseBuilderImpl;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,15 +18,15 @@ import static ai.labs.eddi.utils.RuntimeUtilities.isNullOrEmpty;
 public class RestUtilities {
     private static final String versionQueryParam = "?version=";
 
-    public static WebApplicationException createConflictException(String containerUri, IResourceStore.IResourceId currentId) {
+    public static NoLogWebApplicationException createConflictException(String containerUri, IResourceStore.IResourceId currentId) {
         URI resourceUri = RestUtilities.createURI(containerUri, currentId.getId(), versionQueryParam, currentId.getVersion());
 
-        Response.ResponseBuilder builder = new ResponseBuilderImpl();
+        ResponseBuilderImpl builder = new ResponseBuilderImpl();
         builder.status(Response.Status.CONFLICT);
         builder.entity(resourceUri.toString());
         builder.type(MediaType.TEXT_PLAIN);
 
-        return new WebApplicationException(builder.build());
+        return new NoLogWebApplicationException(builder.build());
     }
 
     public static URI createURI(Object... uriParts) {

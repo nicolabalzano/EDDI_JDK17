@@ -26,9 +26,9 @@ public class TemplatingEngineTest {
         var objectMapper = new ObjectMapper();
         new SerializationCustomizer(true).customize(objectMapper);
         templatingEngine = new TemplatingEngine(
-                engineModule.provideTextTemplateEngine(),
-                engineModule.provideHtmlTemplateEngine(),
-                engineModule.provideJavaScriptTemplateEngine());
+                engineModule.provideTextTemplateEngine(objectMapper),
+                engineModule.provideHtmlTemplateEngine(objectMapper),
+                engineModule.provideJavaScriptTemplateEngine(objectMapper));
     }
 
     @Test

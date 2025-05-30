@@ -1,6 +1,6 @@
 package ai.labs.eddi.backup;
 
-import ai.labs.eddi.engine.model.BotDeploymentStatus;
+import ai.labs.eddi.models.BotDeploymentStatus;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import jakarta.ws.rs.Consumes;
@@ -20,9 +20,9 @@ import java.util.List;
 @Tag(name = "10. Backup Bots", description = "Import & Export Bots as Zip Files")
 public interface IRestImportService {
     @POST
-    @Path("/initialBots")
+    @Path("/examples")
     @Produces(MediaType.APPLICATION_JSON)
-    List<BotDeploymentStatus> importInitialBots();
+    List<BotDeploymentStatus> importBotExamples();
 
     @POST
     @Consumes("application/zip")

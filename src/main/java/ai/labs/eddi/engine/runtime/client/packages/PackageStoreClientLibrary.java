@@ -12,7 +12,7 @@ import ai.labs.eddi.engine.lifecycle.internal.LifecycleManager;
 import ai.labs.eddi.engine.runtime.IExecutablePackage;
 import ai.labs.eddi.engine.runtime.service.IPackageStoreService;
 import ai.labs.eddi.engine.runtime.service.ServiceException;
-import ai.labs.eddi.configs.documentdescriptor.model.DocumentDescriptor;
+import ai.labs.eddi.models.DocumentDescriptor;
 import ai.labs.eddi.utils.RestUtilities;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -114,7 +114,7 @@ public class PackageStoreClientLibrary implements IPackageStoreClientLibrary {
         };
     }
 
-    public static class PackageInitializationException extends Exception {
+    public class PackageInitializationException extends Exception {
         PackageInitializationException(String message, Throwable e) {
             super(message, e);
         }

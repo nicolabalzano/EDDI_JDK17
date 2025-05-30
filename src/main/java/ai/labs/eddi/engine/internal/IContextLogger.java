@@ -1,6 +1,6 @@
 package ai.labs.eddi.engine.internal;
 
-import ai.labs.eddi.engine.model.Deployment;
+import ai.labs.eddi.models.Deployment;
 
 import java.util.Map;
 
@@ -11,6 +11,4 @@ public interface IContextLogger {
                                              String userId);
 
     void setLoggingContext(Map<String, String> loggingContext);
-
-    void clearLoggingContext();
 }

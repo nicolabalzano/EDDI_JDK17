@@ -1,8 +1,8 @@
 package ai.labs.eddi.engine.memory.descriptor.model;
 
-import ai.labs.eddi.engine.model.ConversationState;
-import ai.labs.eddi.engine.model.Deployment;
-import ai.labs.eddi.engine.model.ResourceDescriptor;
+import ai.labs.eddi.models.ConversationState;
+import ai.labs.eddi.models.Deployment;
+import ai.labs.eddi.models.ResourceDescriptor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +20,6 @@ public class ConversationDescriptor extends ResourceDescriptor {
     }
 
     private String botName;
-    private String userId;
     private URI botResource;
     private ViewState viewState;
     private int conversationStepSize;

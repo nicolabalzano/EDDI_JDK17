@@ -5,17 +5,18 @@ import ai.labs.eddi.datastore.IResourceStore;
 import ai.labs.eddi.datastore.IResourceStore.ResourceAlreadyExistsException;
 import ai.labs.eddi.datastore.serialization.IDocumentBuilder;
 import ai.labs.eddi.datastore.serialization.IJsonSerialization;
-import ai.labs.eddi.engine.model.UserConversation;
+import ai.labs.eddi.models.UserConversation;
 import ai.labs.eddi.utils.RuntimeUtilities;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import io.reactivex.rxjava3.core.Observable;
+import org.bson.Document;
+import org.jboss.logging.Logger;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.bson.Document;
-
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
@@ -33,6 +34,7 @@ public class UserConversationStore implements IUserConversationStore {
     private final IJsonSerialization jsonSerialization;
     private final UserConversationResourceStore userConversationStore;
 
+    private static final Logger log = Logger.getLogger(UserConversationStore.class);
 
     @Inject
     public UserConversationStore(MongoDatabase database,
@@ -62,7 +64,7 @@ public class UserConversationStore implements IUserConversationStore {
 
     @Override
     public void createUserConversation(UserConversation userConversation)
-            throws IResourceStore.ResourceStoreException, ResourceAlreadyExistsException {
+            throws ResourceAlreadyExistsException, IResourceStore.ResourceStoreException {
         RuntimeUtilities.checkNotNull(userConversation, "userConversation");
         RuntimeUtilities.checkNotNull(userConversation.getIntent(), "userConversation.intent");
         RuntimeUtilities.checkNotNull(userConversation.getUserId(), "userConversation.userId");
@@ -117,6 +119,8 @@ public class UserConversationStore implements IUserConversationStore {
             } catch (NoSuchElementException e) {
                 //no user conversation with the given intent has been found, so we create a new one
                 Observable.fromPublisher(collection.insertOne(createDocument(userConversation))).blockingFirst();
+            } catch (ResourceAlreadyExistsException e) {
+                throw new RuntimeException(e);
             }
 
         }

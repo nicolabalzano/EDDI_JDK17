@@ -2,19 +2,19 @@ package ai.labs.eddi.engine;
 
 
 import ai.labs.eddi.engine.memory.model.SimpleConversationMemorySnapshot;
-import ai.labs.eddi.engine.model.Context;
-import ai.labs.eddi.engine.model.ConversationState;
-import ai.labs.eddi.engine.model.Deployment;
-import ai.labs.eddi.engine.model.InputData;
+import ai.labs.eddi.models.Context;
+import ai.labs.eddi.models.ConversationState;
+import ai.labs.eddi.models.Deployment;
+import ai.labs.eddi.models.InputData;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.resteasy.annotations.cache.NoCache;
+
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.resteasy.reactive.NoCache;
-
 import java.util.List;
 import java.util.Map;
 
@@ -67,8 +67,7 @@ public interface IRestBotEngine {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Read conversation. outputType=text || json")
     Response readConversationLog(@PathParam("conversationId") String conversationId,
-                                 @QueryParam("outputType") @DefaultValue("json") String outputType,
-                                 @QueryParam("logSize") @DefaultValue("-1") Integer logSize);
+                                 @QueryParam("outputType") String outputType);
 
     @GET
     @NoCache

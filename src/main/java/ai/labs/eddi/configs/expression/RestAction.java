@@ -9,12 +9,13 @@ import ai.labs.eddi.configs.regulardictionary.IRestAction;
 import ai.labs.eddi.datastore.IResourceStore;
 import ai.labs.eddi.utils.CollectionUtilities;
 import ai.labs.eddi.utils.RestUtilities;
+import org.jboss.logging.Logger;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.NotFoundException;
-import org.jboss.logging.Logger;
-
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -73,7 +74,7 @@ public class RestAction implements IRestAction {
 
             return retActions;
         } catch (IResourceStore.ResourceNotFoundException e) {
-            throw new NotFoundException();
+            throw new NoLogWebApplicationException(Response.Status.NOT_FOUND.getStatusCode());
         } catch (IResourceStore.ResourceStoreException e) {
             log.error(e.getLocalizedMessage(), e);
             throw new InternalServerErrorException(e);

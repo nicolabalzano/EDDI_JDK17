@@ -11,17 +11,15 @@ import ai.labs.eddi.configs.packages.model.PackageConfiguration;
 import ai.labs.eddi.datastore.IResourceStore;
 import ai.labs.eddi.utils.CollectionUtilities;
 import ai.labs.eddi.utils.RestUtilities;
+import org.jboss.logging.Logger;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.NotFoundException;
-import org.jboss.logging.Logger;
-
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author ginccc
@@ -46,7 +44,7 @@ public class RestOutputActions implements IRestOutputActions {
 
     @Override
     public List<String> readOutputActions(String packageId, Integer packageVersion, String filter, Integer limit) {
-        List<String> retOutputKeys = new LinkedList<>();
+        List<String> retOutputKeys = new LinkedList<String>();
         try {
             PackageConfiguration packageConfiguration = packageStore.read(packageId, packageVersion);
             List<IResourceStore.IResourceId> resourceIds;
@@ -57,7 +55,7 @@ public class RestOutputActions implements IRestOutputActions {
                     for (BehaviorRuleConfiguration behaviorRuleConfiguration : groupConfiguration.getBehaviorRules()) {
                         for (String action : behaviorRuleConfiguration.getActions()) {
                             if (action.contains(filter)) {
-                                CollectionUtilities.addAllWithoutDuplicates(retOutputKeys, List.of(action));
+                                CollectionUtilities.addAllWithoutDuplicates(retOutputKeys, Arrays.asList(action));
                                 if (retOutputKeys.size() >= limit) {
                                     return sortedOutputKeys(retOutputKeys);
                                 }
@@ -78,7 +76,7 @@ public class RestOutputActions implements IRestOutputActions {
 
             return sortedOutputKeys(retOutputKeys);
         } catch (IResourceStore.ResourceNotFoundException e) {
-            throw new NotFoundException();
+            throw new NoLogWebApplicationException(Response.Status.NOT_FOUND.getStatusCode());
         } catch (IResourceStore.ResourceStoreException e) {
             log.error(e.getLocalizedMessage(), e);
             throw new InternalServerErrorException(e);
@@ -91,7 +89,7 @@ public class RestOutputActions implements IRestOutputActions {
     }
 
     private List<IResourceStore.IResourceId> readBehaviorRuleSetResourceIds(PackageConfiguration packageConfiguration) {
-        List<IResourceStore.IResourceId> resourceIds = new LinkedList<>();
+        List<IResourceStore.IResourceId> resourceIds = new LinkedList<IResourceStore.IResourceId>();
 
         for (PackageConfiguration.PackageExtension packageExtension : packageConfiguration.getPackageExtensions()) {
             if (!packageExtension.getType().toString().startsWith("eddi://ai.labs.behavior")) {
@@ -108,7 +106,7 @@ public class RestOutputActions implements IRestOutputActions {
     }
 
     private List<IResourceStore.IResourceId> readOutputSetResourceIds(PackageConfiguration packageConfiguration) {
-        List<IResourceStore.IResourceId> resourceIds = new LinkedList<>();
+        List<IResourceStore.IResourceId> resourceIds = new LinkedList<IResourceStore.IResourceId>();
 
         for (PackageConfiguration.PackageExtension packageExtension : packageConfiguration.getPackageExtensions()) {
             if (!packageExtension.getType().toString().startsWith("eddi://ai.labs.output")) {

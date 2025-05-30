@@ -9,7 +9,7 @@ import ai.labs.eddi.datastore.IResourceStore;
 import ai.labs.eddi.datastore.mongo.HistorizedResourceStore;
 import ai.labs.eddi.datastore.mongo.MongoResourceStorage;
 import ai.labs.eddi.datastore.serialization.IDocumentBuilder;
-import ai.labs.eddi.configs.documentdescriptor.model.DocumentDescriptor;
+import ai.labs.eddi.models.DocumentDescriptor;
 import ai.labs.eddi.utils.RuntimeUtilities;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import org.bson.Document;
@@ -28,7 +28,6 @@ import static ai.labs.eddi.utils.RestUtilities.extractResourceId;
 
 @ApplicationScoped
 public class BotStore implements IBotStore {
-    public static final String PACKAGES_FIELD = "packages";
     private final IDocumentDescriptorStore documentDescriptorStore;
     private final BotHistorizedResourceStore botResourceStore;
 
@@ -49,7 +48,7 @@ public class BotStore implements IBotStore {
 
     @Override
     public IResourceStore.IResourceId create(BotConfiguration botConfiguration) throws IResourceStore.ResourceStoreException {
-        RuntimeUtilities.checkCollectionNoNullElements(botConfiguration.getPackages(), PACKAGES_FIELD);
+        RuntimeUtilities.checkCollectionNoNullElements(botConfiguration.getPackages(), "packages");
         return botResourceStore.create(botConfiguration);
     }
 
@@ -61,7 +60,7 @@ public class BotStore implements IBotStore {
     @Override
     @IResourceStore.ConfigurationUpdate
     public Integer update(String id, Integer version, BotConfiguration botConfiguration) throws IResourceStore.ResourceStoreException, IResourceStore.ResourceModifiedException, IResourceStore.ResourceNotFoundException {
-        RuntimeUtilities.checkCollectionNoNullElements(botConfiguration.getPackages(), PACKAGES_FIELD);
+        RuntimeUtilities.checkCollectionNoNullElements(botConfiguration.getPackages(), "packages");
         return botResourceStore.update(id, version, botConfiguration);
     }
 
@@ -121,11 +120,8 @@ public class BotStore implements IBotStore {
         private static final String packageResourceURI = "eddi://ai.labs.package/packagestore/packages/";
         private static final String versionQueryParam = "?version=";
 
-        BotMongoResourceStorage(MongoDatabase database, String collectionName,
-                                IDocumentBuilder documentBuilder,
-                                Class<BotConfiguration> botConfigurationClass) {
-
-            super(database, collectionName, documentBuilder, botConfigurationClass, PACKAGES_FIELD);
+        BotMongoResourceStorage(MongoDatabase database, String collectionName, IDocumentBuilder documentBuilder, Class<BotConfiguration> botConfigurationClass) {
+            super(database, collectionName, documentBuilder, botConfigurationClass);
         }
 
         List<IResourceStore.IResourceId> getBotIdsContainingPackageUri(String packageId, Integer packageVersion)
@@ -133,7 +129,7 @@ public class BotStore implements IBotStore {
 
             String searchedForPackageUri = String.join("",
                     packageResourceURI, packageId, versionQueryParam, String.valueOf(packageVersion));
-            Document filter = new Document(PACKAGES_FIELD,
+            Document filter = new Document("packages",
                     new Document("$in", Collections.singletonList(searchedForPackageUri)));
 
             return ResourceUtilities.getAllConfigsContainingResources(filter,

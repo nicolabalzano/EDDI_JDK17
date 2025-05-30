@@ -8,7 +8,7 @@ import ai.labs.eddi.configs.regulardictionary.model.RegularDictionaryConfigurati
 import ai.labs.eddi.configs.rest.RestVersionInfo;
 import ai.labs.eddi.configs.schema.IJsonSchemaCreator;
 import ai.labs.eddi.datastore.IResourceStore;
-import ai.labs.eddi.configs.documentdescriptor.model.DocumentDescriptor;
+import ai.labs.eddi.models.DocumentDescriptor;
 import org.jboss.logging.Logger;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -113,18 +113,18 @@ public class RestRegularDictionaryStore implements IRestRegularDictionaryStore {
         for (var patchInstruction : patchInstructions) {
             var regularConfigPatch = patchInstruction.getDocument();
             switch (patchInstruction.getOperation()) {
-                case SET -> {
+                case SET:
                     currentDictionaryConfig.getWords().removeAll(regularConfigPatch.getWords());
                     currentDictionaryConfig.getWords().addAll(regularConfigPatch.getWords());
                     currentDictionaryConfig.getPhrases().removeAll(regularConfigPatch.getPhrases());
                     currentDictionaryConfig.getPhrases().addAll(regularConfigPatch.getPhrases());
-                }
-                case DELETE -> {
+                    break;
+                case DELETE:
                     currentDictionaryConfig.getWords().removeAll(regularConfigPatch.getWords());
                     currentDictionaryConfig.getPhrases().removeAll(regularConfigPatch.getPhrases());
-                }
-                default ->
-                        throw new IResourceStore.ResourceStoreException("Patch operation must be either SET or DELETE!");
+                    break;
+                default:
+                    throw new IResourceStore.ResourceStoreException("Patch operation must be either SET or DELETE!");
             }
         }
 

@@ -17,7 +17,7 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class PropertySetterStore implements IPropertySetterStore {
-    private final HistorizedResourceStore<PropertySetterConfiguration> propertySetterResourceStore;
+    private HistorizedResourceStore<PropertySetterConfiguration> propertySetterResourceStore;
 
     @Inject
     public PropertySetterStore(MongoDatabase database, IDocumentBuilder documentBuilder) {

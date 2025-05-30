@@ -8,7 +8,7 @@ import ai.labs.eddi.configs.patch.PatchInstruction;
 import ai.labs.eddi.configs.rest.RestVersionInfo;
 import ai.labs.eddi.configs.schema.IJsonSchemaCreator;
 import ai.labs.eddi.datastore.IResourceStore;
-import ai.labs.eddi.configs.documentdescriptor.model.DocumentDescriptor;
+import ai.labs.eddi.models.DocumentDescriptor;
 import org.jboss.logging.Logger;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -119,14 +119,15 @@ public class RestOutputStore implements IRestOutputStore {
         for (var patchInstruction : patchInstructions) {
             var outputConfigurationSetPatch = patchInstruction.getDocument();
             switch (patchInstruction.getOperation()) {
-                case SET -> {
+                case SET:
                     currentOutputConfigurationSet.getOutputSet().removeAll(outputConfigurationSetPatch.getOutputSet());
                     currentOutputConfigurationSet.getOutputSet().addAll(outputConfigurationSetPatch.getOutputSet());
-                }
-                case DELETE ->
-                        currentOutputConfigurationSet.getOutputSet().removeAll(outputConfigurationSetPatch.getOutputSet());
-                default ->
-                        throw new IResourceStore.ResourceStoreException("Patch operation must be either SET or DELETE!");
+                    break;
+                case DELETE:
+                    currentOutputConfigurationSet.getOutputSet().removeAll(outputConfigurationSetPatch.getOutputSet());
+                    break;
+                default:
+                    throw new IResourceStore.ResourceStoreException("Patch operation must be either SET or DELETE!");
             }
         }
 

@@ -1,19 +1,18 @@
 package ai.labs.eddi.engine.memory.rest;
 
+import ai.labs.eddi.datastore.IResourceStore;
 import ai.labs.eddi.engine.memory.descriptor.model.ConversationDescriptor;
 import ai.labs.eddi.engine.memory.model.ConversationMemorySnapshot;
 import ai.labs.eddi.engine.memory.model.SimpleConversationMemorySnapshot;
-import ai.labs.eddi.engine.model.ConversationState;
-import ai.labs.eddi.engine.model.ConversationStatus;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import ai.labs.eddi.models.ConversationState;
+import ai.labs.eddi.models.ConversationStatus;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
-
-import static ai.labs.eddi.datastore.IResourceStore.*;
 
 /**
  * @author ginccc
@@ -40,24 +39,19 @@ public interface IRestConversationStore {
                                                                @QueryParam("returnDetailed") @DefaultValue("false") Boolean returnDetailed,
                                                                @QueryParam("returnCurrentStepOnly") @DefaultValue("true") Boolean returnCurrentStepOnly,
                                                                @QueryParam("returningFields") List<String> returningFields)
-            throws ResourceStoreException, ResourceNotFoundException;
+            throws IResourceStore.ResourceStoreException, IResourceStore.ResourceNotFoundException;
 
     @GET
     @Path("/{conversationId}")
     @Produces(MediaType.APPLICATION_JSON)
     ConversationMemorySnapshot readRawConversationLog(@PathParam("conversationId") String conversationId)
-            throws ResourceStoreException, ResourceNotFoundException;
+            throws IResourceStore.ResourceStoreException, IResourceStore.ResourceNotFoundException;
 
     @DELETE
     @Path("/{conversationId}")
     void deleteConversationLog(@PathParam("conversationId") String conversationId,
                                @QueryParam("deletePermanently") @DefaultValue("false") Boolean deletePermanently)
-            throws ResourceStoreException, ResourceNotFoundException;
-
-    @DELETE
-    @Path("/")
-    Integer permanentlyDeleteEndedConversationLogs(@QueryParam("deleteOlderThanDays") Integer deleteOlderThanDays)
-            throws ResourceStoreException, ResourceNotFoundException, ResourceModifiedException;
+            throws IResourceStore.ResourceStoreException, IResourceStore.ResourceNotFoundException;
 
     @GET
     @Path("/active/{botId}")
@@ -65,7 +59,7 @@ public interface IRestConversationStore {
     List<ConversationStatus> getActiveConversations(@PathParam("botId") String botId,
                                                     @Parameter(name = "botVersion", required = true, example = "1")
                                                     @QueryParam("botVersion") Integer botVersion)
-            throws ResourceStoreException, ResourceNotFoundException;
+            throws IResourceStore.ResourceStoreException, IResourceStore.ResourceNotFoundException;
 
     @POST
     @Path("end")

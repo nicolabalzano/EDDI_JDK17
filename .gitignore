@@ -80,5 +80,5 @@ docker/data/
 # Gradle
 .gradle
 
-/tmp/
+/tmp/import/
 /.mvn/wrapper/maven-wrapper.jar

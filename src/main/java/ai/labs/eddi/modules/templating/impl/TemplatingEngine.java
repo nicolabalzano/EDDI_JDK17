@@ -1,12 +1,12 @@
 package ai.labs.eddi.modules.templating.impl;
 
 import ai.labs.eddi.modules.templating.ITemplatingEngine;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.exceptions.TemplateInputException;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -62,10 +62,14 @@ public class TemplatingEngine implements ITemplatingEngine {
     }
 
     private TemplateEngine getTemplateEngine(TemplateMode templateMode) {
-        return switch (templateMode) {
-            case HTML -> htmlTemplateEngine.getTemplateEngine();
-            case JAVASCRIPT -> javaScriptTemplateEngine.getTemplateEngine();
-            default -> textTemplateEngine.getTemplateEngine();
-        };
+        switch (templateMode) {
+            case HTML:
+                return htmlTemplateEngine.getTemplateEngine();
+            case JAVASCRIPT:
+                return javaScriptTemplateEngine.getTemplateEngine();
+            case TEXT:
+            default:
+                return textTemplateEngine.getTemplateEngine();
+        }
     }
 }

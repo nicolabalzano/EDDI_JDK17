@@ -23,7 +23,7 @@ import static ai.labs.eddi.utils.RuntimeUtilities.*;
  */
 @ApplicationScoped
 public class OutputStore implements IOutputStore {
-    private final HistorizedResourceStore<OutputConfigurationSet> outputResourceStore;
+    private HistorizedResourceStore<OutputConfigurationSet> outputResourceStore;
     private static final OutputComparator OUTPUT_COMPARATOR = new OutputComparator();
 
     @Inject

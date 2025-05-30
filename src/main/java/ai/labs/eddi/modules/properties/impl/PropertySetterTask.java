@@ -1,10 +1,6 @@
 package ai.labs.eddi.modules.properties.impl;
 
-import ai.labs.eddi.configs.packages.model.ExtensionDescriptor;
-import ai.labs.eddi.configs.properties.model.Property;
-import ai.labs.eddi.configs.properties.model.PropertyInstruction;
 import ai.labs.eddi.configs.propertysetter.model.PropertySetterConfiguration;
-import ai.labs.eddi.engine.model.Context;
 import ai.labs.eddi.engine.lifecycle.ILifecycleTask;
 import ai.labs.eddi.engine.lifecycle.exceptions.LifecycleException;
 import ai.labs.eddi.engine.lifecycle.exceptions.PackageConfigurationException;
@@ -15,11 +11,11 @@ import ai.labs.eddi.engine.memory.IDataFactory;
 import ai.labs.eddi.engine.memory.IMemoryItemConverter;
 import ai.labs.eddi.engine.runtime.client.configuration.IResourceClientLibrary;
 import ai.labs.eddi.engine.runtime.service.ServiceException;
-import ai.labs.eddi.configs.properties.model.Property.Scope;
+import ai.labs.eddi.models.*;
+import ai.labs.eddi.models.Property.Scope;
 import ai.labs.eddi.modules.nlp.expressions.Expressions;
 import ai.labs.eddi.modules.nlp.expressions.utilities.IExpressionProvider;
 import ai.labs.eddi.modules.properties.IPropertySetter;
-import ai.labs.eddi.modules.properties.model.SetOnActions;
 import ai.labs.eddi.modules.templating.ITemplatingEngine;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,12 +23,14 @@ import ognl.Ognl;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import java.net.URI;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ai.labs.eddi.configs.properties.model.Property.Scope.conversation;
+import static ai.labs.eddi.models.Property.Scope.conversation;
 import static ai.labs.eddi.utils.RuntimeUtilities.checkNotNull;
 import static ai.labs.eddi.utils.RuntimeUtilities.isNullOrEmpty;
 import static java.lang.Boolean.parseBoolean;
@@ -130,8 +128,7 @@ public class PropertySetterTask implements ILifecycleTask {
                     List<String> actions = setOnAction.getActions();
                     if (actions.contains(action) || actions.contains("*")) {
                         setOnAction.getSetProperties().stream().
-                                filter(propertyInstruction ->
-                                        !propertyInstructions.contains(propertyInstruction)).
+                                filter(propertyInstruction -> !propertyInstructions.contains(propertyInstruction)).
                                 forEach(propertyInstructions::add);
                     }
                 });
@@ -151,48 +148,37 @@ public class PropertySetterTask implements ILifecycleTask {
                             if (!conversationProperties.containsKey(name) || property.getOverride()) {
                                 if (!isNullOrEmpty(fromObjectPath)) {
                                     templatedObj = Ognl.getValue(fromObjectPath, templateDataObjects);
-                                    if (!isNullOrEmpty(toObjectPath)) {
-                                        Ognl.setValue(toObjectPath, templateDataObjects, templatedObj);
-                                    } else if (templatedObj instanceof String) {
-                                        templateString = templatingEngine.processTemplate(
-                                                templatedObj.toString(),
-                                                templateDataObjects);
-                                        conversationProperties.put(name,
-                                                new Property(name, templateString, scope));
+                                    if (templatedObj instanceof String) {
+                                        templateString = templatingEngine.processTemplate(templatedObj.toString(), templateDataObjects);
+                                        conversationProperties.put(name, new Property(name, templateString, scope));
                                     } else if (templatedObj instanceof Map valueMap) {
-                                        conversationProperties.put(name,
-                                                new Property(name, new LinkedHashMap<>(valueMap), scope));
+                                        conversationProperties.put(name, new Property(name, valueMap, scope));
                                     } else if (templatedObj instanceof List valueList) {
-                                        conversationProperties.put(name,
-                                                new Property(name, new ArrayList<>(valueList), scope));
+                                        conversationProperties.put(name, new Property(name, valueList, scope));
                                     } else if (templatedObj instanceof Integer valueInt) {
-                                        conversationProperties.put(name,
-                                                new Property(name, valueInt, scope));
+                                        conversationProperties.put(name, new Property(name, valueInt, scope));
                                     } else if (templatedObj instanceof Float valueFloat) {
-                                        conversationProperties.put(name,
-                                                new Property(name, valueFloat, scope));
-                                    } else if (templatedObj instanceof Boolean valueBoolean) {
-                                        conversationProperties.put(name,
-                                                new Property(name, valueBoolean, scope));
+                                        conversationProperties.put(name, new Property(name, valueFloat, scope));
+                                    }
+
+                                    if (!isNullOrEmpty(templatedObj) && !isNullOrEmpty(toObjectPath)) {
+                                        Ognl.setValue(toObjectPath, templateDataObjects, templatedObj);
                                     }
                                 } else {
                                     var valueString = property.getValueString();
                                     if (!isNullOrEmpty(valueString)) {
-                                        templateString =
-                                                templatingEngine.processTemplate(valueString, templateDataObjects);
+                                        templateString = templatingEngine.processTemplate(valueString, templateDataObjects);
                                         conversationProperties.put(name, new Property(name, templateString, scope));
                                     }
 
-                                    var valueMap = property.getValueObject();
-                                    if (valueMap != null) {
-                                        conversationProperties.put(name,
-                                                new Property(name, new LinkedHashMap<>(valueMap), scope));
+                                    var valueObject = property.getValueObject();
+                                    if (valueObject != null) {
+                                        conversationProperties.put(name, new Property(name, valueObject, scope));
                                     }
 
                                     var valueList = property.getValueList();
                                     if (valueList != null) {
-                                        conversationProperties.put(name,
-                                                new Property(name, new ArrayList<>(valueList), scope));
+                                        conversationProperties.put(name, new Property(name, valueList, scope));
                                     }
 
                                     var valueInt = property.getValueInt();
@@ -351,7 +337,7 @@ public class PropertySetterTask implements ILifecycleTask {
                 propertyInstruction.setValueInt(i);
             } else if (property.containsKey(VALUE_FLOAT) && property.get(VALUE_FLOAT) instanceof Float f) {
                 propertyInstruction.setValueFloat(f);
-            } else if (property.containsKey(VALUE_BOOLEAN) && property.get(VALUE_BOOLEAN) instanceof Boolean b) {
+            }else if (property.containsKey(VALUE_BOOLEAN) && property.get(VALUE_BOOLEAN) instanceof Boolean b) {
                 propertyInstruction.setValueBoolean(b);
             }
 

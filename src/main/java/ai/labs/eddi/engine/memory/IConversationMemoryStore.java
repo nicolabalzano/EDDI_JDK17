@@ -2,7 +2,7 @@ package ai.labs.eddi.engine.memory;
 
 import ai.labs.eddi.datastore.IResourceStore;
 import ai.labs.eddi.engine.memory.model.ConversationMemorySnapshot;
-import ai.labs.eddi.engine.model.ConversationState;
+import ai.labs.eddi.models.ConversationState;
 
 import java.util.List;
 
@@ -23,6 +23,4 @@ public interface IConversationMemoryStore {
     ConversationState getConversationState(String conversationId);
 
     Long getActiveConversationCount(String botId, Integer botVersion);
-
-    List<String> getEndedConversationIds();
 }

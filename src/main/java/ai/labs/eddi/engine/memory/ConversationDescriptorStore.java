@@ -5,14 +5,12 @@ import ai.labs.eddi.datastore.mongo.DescriptorStore;
 import ai.labs.eddi.datastore.serialization.IDocumentBuilder;
 import ai.labs.eddi.engine.memory.descriptor.IConversationDescriptorStore;
 import ai.labs.eddi.engine.memory.descriptor.model.ConversationDescriptor;
-import com.mongodb.client.model.Filters;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import com.mongodb.reactivestreams.client.MongoDatabase;
-import io.reactivex.rxjava3.core.Observable;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.bson.Document;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.List;
 
 import static ai.labs.eddi.datastore.mongo.DescriptorStore.COLLECTION_DESCRIPTORS;
@@ -36,9 +34,9 @@ public class ConversationDescriptorStore implements IConversationDescriptorStore
     @Override
     public void updateTimeStamp(String conversationId) {
         String resource = resourceUri + conversationId;
-        Observable.fromPublisher(descriptorCollection.findOneAndUpdate(
-                Filters.eq("resource", resource),
-                new Document("$set", new Document(FIELD_LAST_MODIFIED, System.currentTimeMillis())))).blockingFirst();
+        descriptorCollection.findOneAndUpdate(
+                new Document("resource", resource),
+                new Document("$set", new Document(FIELD_LAST_MODIFIED, System.currentTimeMillis())));
     }
 
     @Override

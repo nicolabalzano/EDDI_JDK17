@@ -11,21 +11,23 @@ import ai.labs.eddi.engine.memory.IData;
 import ai.labs.eddi.engine.memory.model.Data;
 import ai.labs.eddi.engine.runtime.client.configuration.IResourceClientLibrary;
 import ai.labs.eddi.engine.runtime.service.ServiceException;
-import ai.labs.eddi.configs.packages.model.ExtensionDescriptor;
+import ai.labs.eddi.models.ExtensionDescriptor;
 import ai.labs.eddi.modules.nlp.expressions.Expression;
 import ai.labs.eddi.modules.nlp.expressions.Expressions;
 import ai.labs.eddi.modules.nlp.expressions.utilities.IExpressionProvider;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ai.labs.eddi.configs.packages.model.ExtensionDescriptor.ConfigValue;
-import static ai.labs.eddi.configs.packages.model.ExtensionDescriptor.FieldType;
+import static ai.labs.eddi.models.ExtensionDescriptor.ConfigValue;
+import static ai.labs.eddi.models.ExtensionDescriptor.FieldType;
 
 /**
  * @author ginccc
@@ -136,23 +138,22 @@ public class BehaviorRulesEvaluationTask implements ILifecycleTask {
                              boolean addResultsToConversationMemory, boolean makePublic, boolean appendActions) {
         var currentStep = memory.getCurrentStep();
 
-        var distinctResults = new LinkedHashSet<>();
+        List<String> results = new LinkedList<>();
         if (appendActions || allCurrentActions.isEmpty()) {
             IData<List<String>> latestResults = currentStep.getLatestData(key);
             if (latestResults != null && latestResults.getResult() != null) {
-                distinctResults.addAll(latestResults.getResult());
+                results.addAll(latestResults.getResult());
             }
         }
 
-        distinctResults.addAll(allCurrentActions);
+        results.addAll(allCurrentActions.stream().filter(result -> !results.contains(result)).toList());
 
-        var endResult = new ArrayList<>(distinctResults);
-        var resultsData = new Data<>(key, endResult);
+        var resultsData = new Data<>(key, results);
         resultsData.setPublic(makePublic);
         currentStep.storeData(resultsData);
         if (addResultsToConversationMemory) {
             currentStep.resetConversationOutput(key);
-            currentStep.addConversationOutputList(key, endResult);
+            currentStep.addConversationOutputList(key, results);
         }
     }
 

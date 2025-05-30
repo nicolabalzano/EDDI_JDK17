@@ -3,7 +3,7 @@ package ai.labs.eddi.configs.utilities;
 import ai.labs.eddi.configs.documentdescriptor.IDocumentDescriptorStore;
 import ai.labs.eddi.datastore.IResourceStore;
 import ai.labs.eddi.engine.memory.descriptor.model.ConversationDescriptor;
-import ai.labs.eddi.configs.documentdescriptor.model.DocumentDescriptor;
+import ai.labs.eddi.models.DocumentDescriptor;
 import ai.labs.eddi.utils.RestUtilities;
 import com.mongodb.reactivestreams.client.FindPublisher;
 import com.mongodb.reactivestreams.client.MongoCollection;
@@ -13,8 +13,6 @@ import org.bson.Document;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.bson.conversions.Bson;
-
 import java.net.URI;
 import java.util.Comparator;
 import java.util.Date;
@@ -30,7 +28,7 @@ public class ResourceUtilities {
     private static final String MONGO_OBJECT_VERSION = "_version";
     private static final String COPY_APPENDIX = " - Copy";
 
-    public static List<IResourceStore.IResourceId> getAllConfigsContainingResources(Bson filter,
+    public static List<IResourceStore.IResourceId> getAllConfigsContainingResources(Document filter,
                                                                                     MongoCollection<Document> currentCollection,
                                                                                     MongoCollection<Document> historyCollection,
                                                                                     IDocumentDescriptorStore documentDescriptorStore)
@@ -59,8 +57,9 @@ public class ResourceUtilities {
     }
 
     private static void extractIds(List<String> ids, FindPublisher<Document> documentIterable) {
-        Observable.fromPublisher(documentIterable).
-                subscribe(document -> ids.add(document.getObjectId(MONGO_OBJECT_ID).toString()));
+        Observable.fromPublisher(documentIterable).subscribe(document -> {
+            ids.add(document.getObjectId(MONGO_OBJECT_ID).toString());
+        });
 
     }
 
@@ -146,10 +145,9 @@ public class ResourceUtilities {
         return descriptor;
     }
 
-    public static ConversationDescriptor createConversationDescriptorDocument(URI resource, URI botResourceURI, String userId) {
+    public static ConversationDescriptor createConversationDescriptorDocument(URI resource, URI botResourceURI) {
         ConversationDescriptor conversationDescriptor = new ConversationDescriptor();
         conversationDescriptor.setResource(resource);
-        conversationDescriptor.setUserId(userId);
         conversationDescriptor.setBotResource(botResourceURI);
         Date createdOn = new Date(System.currentTimeMillis());
         conversationDescriptor.setCreatedOn(createdOn);
