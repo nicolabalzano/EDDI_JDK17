@@ -1,38 +1,73 @@
 package ai.labs.eddi.utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.security.auth.Subject;
 import java.security.Principal;
-import java.util.Random;
 import java.util.Set;
 
 /**
  * @author ginccc
  */
 public class SecurityUtilities {
-    private static final int SALT_LENGTH = 64;
-    private static final char[] ALLOWED_CHARS = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+    
+    /**
+     * Hash a password using BCrypt with automatic salt generation.
+     * BCrypt automatically generates a unique salt for each password.
+     * 
+     * @param password The plain text password to hash
+     * @return The BCrypt hash containing salt and hashed password
+     */
+    public static String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt(12));
+    }
 
+    /**
+     * Verify a password against a BCrypt hash.
+     * BCrypt automatically extracts the salt from the stored hash.
+     * 
+     * @param password The plain text password to verify
+     * @param hashedPassword The stored BCrypt hash
+     * @return true if the password matches, false otherwise
+     */
+    public static boolean verifyPassword(String password, String hashedPassword) {
+        try {
+            return BCrypt.checkpw(password, hashedPassword);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * @deprecated Use hashPassword(String password) instead
+     */
+    @Deprecated
     public static String hashPassword(String password, String salt) {
         String unencryptedBytes = salt + password + salt;
         return DigestUtils.sha512Hex(unencryptedBytes);
     }
 
+    /**
+     * @deprecated BCrypt handles salt generation automatically
+     */
+    @Deprecated
     public static String generateSalt() {
-        return generateSalt(SALT_LENGTH);
+        return generateSalt(64);
     }
 
+    @Deprecated
     private static String generateSalt(int length) {
-        return generateSalt(length, ALLOWED_CHARS);
+        return generateSalt(length, "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray());
     }
 
+    @Deprecated
     private static String generateSalt(int length, char[] allowedChars) {
         StringBuilder finalSalt = new StringBuilder();
         int random;
 
         for (int i = 0; i < length; i++) {
-            random = new Random().nextInt(allowedChars.length - 1);
+            random = new java.util.Random().nextInt(allowedChars.length - 1);
             finalSalt.append(allowedChars[random]);
         }
 

@@ -10,13 +10,11 @@
 
     <link rel="icon" href="/img/favicon.ico" class="js-favicon">
     <link href="/css/bootstrap-4.6.2.min.css" rel="stylesheet" type="text/css">
-    <link href="/css/dashboard.css" rel="stylesheet" type="text/css">
-
-    <script type="text/javascript" src="/js/jquery-3.6.1.min.js"></script>
+    <link href="/css/dashboard.css" rel="stylesheet" type="text/css">    <script type="text/javascript" src="/js/jquery-3.6.1.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap-4.6.2.min.js"></script>
     <script type="text/javascript" src="/js/moment-2.29.4.min.js"></script>
-
     <script type="text/javascript" src="/js/dashboard.js"></script>
+    <script type="text/javascript" src="/js/auth-check.js"></script>
     <!-- KEYCLOAK-SCRIPT-INSERT-IF-ENABLED -->
 </head>
 <body>
@@ -25,8 +23,7 @@
 <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-black fixed-top">
     <div class="container">
         <img src="img/logo_high.png" alt="E.D.D.I Logo" class="eddi-logo"/>
-        <h4>&nbsp;Enhanced Dialog Driven Intelligence</h4>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
+        <h4>&nbsp;Enhanced Dialog Driven Intelligence</h4>        <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link text-color" href="https://docs.labs.ai" target="_blank">Docs</a>
@@ -34,6 +31,11 @@
                 <li class="nav-item">
                     <a class="nav-link text-color" href="https://labsai.atlassian.net/servicedesk/customer/portal/1"
                        target="_blank">Support & Feedback</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-color logout-btn" href="#" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
                 </li>
             </ul>
         </div>

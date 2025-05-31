@@ -1,6 +1,7 @@
 package ai.labs.eddi.modules.nlp.internal.matches;
 
 import ai.labs.eddi.modules.nlp.extensions.dictionaries.IDictionary;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * @author ginccc
  */
+@EqualsAndHashCode
 public class RawSolution {
     public enum Match {
         FULLY,

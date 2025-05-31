@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E.D.D.I Login</title>
+    <meta name="csrf-token" content="{{CSRF_TOKEN}}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="/css/bootstrap-4.6.2.min.css" rel="stylesheet" type="text/css">
+    <link href="/css/dashboard.css" rel="stylesheet" type="text/css">
+      <style>
+        body {
+            background-color: #000000;
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+            background: #262626;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h2 {
+            color: #E8AC17;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header p {
+            color: #cccccc;
+            margin: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-control {
+            border-radius: 5px;
+            border: 2px solid #404040;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        
+        .form-control:focus {
+            border-color: #E8AC17;
+            box-shadow: 0 0 0 0.2rem rgba(232, 172, 23, 0.25);
+            background-color: #1a1a1a;
+            color: white;
+        }
+        
+        .form-control::placeholder {
+            color: #999999;
+        }
+        
+        .btn-login {
+            background-color: #E8AC17;
+            border-color: #E8AC17;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 1rem;
+        }
+        
+        .btn-login:hover {
+            background-color: #d4941a;
+            border-color: #d4941a;
+            color: white;
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .alert {
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-danger {
+            background-color: #721c24;
+            border-color: #842029;
+            color: #f8d7da;
+        }
+        
+        .alert-success {
+            background-color: #0f5132;
+            border-color: #198754;
+            color: #d1e7dd;
+        }
+        
+        .footer-text {
+            text-align: center;
+            margin-top: 2rem;
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+        
+        .footer-text a {
+            color: #E8AC17;
+            text-decoration: none;
+        }
+        
+        .footer-text a:hover {
+            color: #d4941a;
+            text-decoration: underline;
+        }
+        
+        .csrf-info {
+            font-size: 0.8rem;
+            color: #999999;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h2>E.D.D.I</h2>
+            <p>Enhanced Dialog Driven Intelligence</p>
+        </div>
+        
+        <div id="alert-container"></div>
+        
+        <form id="loginForm">
+            <input type="hidden" name="csrfToken" value="{{CSRF_TOKEN}}" />
+            
+            <div class="form-group">
+                <label for="username" class="sr-only">Username</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="username" 
+                       name="username" 
+                       placeholder="Username" 
+                       required 
+                       autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="sr-only">Password</label>
+                <input type="password" 
+                       class="form-control" 
+                       id="password" 
+                       name="password" 
+                       placeholder="Password" 
+                       required 
+                       autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn btn-login" id="loginButton">
+                <span class="loading-spinner">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </span>
+                Sign In
+            </button>
+        </form>
+        
+        <div class="csrf-info">
+            <small>Protected with CSRF token</small>
+        </div>
+          <div class="footer-text">
+            <small>&copy; LABS.AI 2006 - 2025</small>
+        </div>
+        
+        <div class="footer-text" style="margin-top: 1rem;">
+            <p>Don't have an account? <a href="/auth/signup" style="color: #E8AC17; text-decoration: none;">Sign up here</a></p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/jquery-3.6.1.min.js"></script>
+    <script src="/js/bootstrap-4.6.2.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            const $form = $('#loginForm');
+            const $button = $('#loginButton');
+            const $spinner = $('.loading-spinner');
+            const $alertContainer = $('#alert-container');
+            
+            // Focus on username field
+            $('#username').focus();
+            
+            // Handle form submission
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                
+                // Clear previous alerts
+                $alertContainer.empty();
+                  // Show loading state
+                $button.prop('disabled', true);
+                $spinner.show();
+                
+                // Get form data as JSON
+                const formData = {
+                    username: $('#username').val().trim(),
+                    password: $('#password').val(),
+                    csrfToken: $('input[name="csrfToken"]').val()
+                };
+                
+                console.log('Login form data being sent:', {
+                    username: formData.username,
+                    password: formData.password ? '[PRESENT]' : '[MISSING]',
+                    csrfToken: formData.csrfToken ? '[PRESENT: ' + formData.csrfToken.substring(0, 10) + '...]' : '[MISSING]'
+                });
+                
+                // Submit login request
+                $.ajax({
+                    url: '/auth/login',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        if (response.success) {
+                            showAlert('success', response.message || 'Login successful!');
+                            
+                            // Check for stored redirect URL
+                            const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || response.redirectUrl || '/';
+                            sessionStorage.removeItem('redirectAfterLogin');
+                            
+                            // Redirect after short delay
+                            setTimeout(function() {
+                                window.location.href = redirectUrl;
+                            }, 1000);
+                        } else {
+                            showAlert('danger', response.message || 'Login failed');
+                            resetForm();
+                        }
+                    },
+                    error: function(xhr) {
+                        let message = 'Login failed';
+                        
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            message = response.message || response.error || message;
+                        } catch (e) {
+                            // Use default message
+                        }
+                        
+                        showAlert('danger', message);
+                        resetForm();
+                    }
+                });
+            });
+            
+            function showAlert(type, message) {
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                `;
+                $alertContainer.html(alertHtml);
+            }
+            
+            function resetForm() {
+                $button.prop('disabled', false);
+                $spinner.hide();
+                $('#password').val('').focus();
+            }
+            
+            // Handle Enter key in form fields
+            $form.find('input').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $form.submit();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

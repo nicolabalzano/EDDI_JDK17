@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - E.D.D.I</title>
+    <meta name="csrf-token" content="{{CSRF_TOKEN}}">
+      <!-- Bootstrap CSS -->
+    <link href="/css/bootstrap-4.6.2.min.css" rel="stylesheet" type="text/css">
+    <link href="/css/dashboard.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">    <style>
+        body {
+            background-color: #000000;
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .signup-container {
+            max-width: 450px;
+            width: 100%;
+            padding: 2rem;
+            background: #262626;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .signup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .signup-header h2 {
+            color: #E8AC17;
+            margin-bottom: 0.5rem;
+        }
+        
+        .signup-header p {
+            color: #cccccc;
+            margin: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-control {
+            border-radius: 5px;
+            border: 2px solid #404040;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        
+        .form-control:focus {
+            border-color: #E8AC17;
+            box-shadow: 0 0 0 0.2rem rgba(232, 172, 23, 0.25);
+            background-color: #1a1a1a;
+            color: white;
+        }
+        
+        .form-control::placeholder {
+            color: #999999;
+        }
+        
+        .btn-signup {
+            background-color: #E8AC17;
+            border-color: #E8AC17;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .btn-signup:hover {
+            background-color: #d4941a;
+            border-color: #d4941a;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .btn-signup:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-outline-secondary {
+            color: #cccccc;
+            border-color: #404040;
+            background-color: transparent;
+        }
+        
+        .btn-outline-secondary:hover {
+            color: white;
+            background-color: #404040;
+            border-color: #404040;
+        }
+        
+        .alert {
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-danger {
+            background-color: #721c24;
+            border-color: #842029;
+            color: #f8d7da;
+        }
+        
+        .alert-success {
+            background-color: #0f5132;
+            border-color: #198754;
+            color: #d1e7dd;
+        }
+        
+        .alert-warning {
+            background-color: #664d03;
+            border-color: #ffda6a;
+            color: #ffda6a;
+        }
+        
+        .footer-text {
+            text-align: center;
+            margin-top: 2rem;
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+        
+        .footer-text a {
+            color: #E8AC17;
+            text-decoration: none;
+        }
+        
+        .footer-text a:hover {
+            color: #d4941a;
+            text-decoration: underline;
+        }
+        
+        .password-requirements {
+            font-size: 0.85rem;
+            color: #999999;
+            margin-top: 0.5rem;
+        }
+        
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        
+        .requirement.valid {
+            color: #28a745;
+        }
+        
+        .requirement.invalid {
+            color: #dc3545;
+        }
+        
+        .requirement i {
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+        
+        .strength-meter {
+            height: 6px;
+            background-color: #404040;
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin-right: 0.5rem;
+        }
+        
+        .input-group-text {
+            background-color: #404040;
+            border-color: #404040;
+            color: white;
+        }
+        
+        .form-text {
+            color: #999999;
+        }    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <h2>E.D.D.I</h2>
+            <p>Enhanced Dialog Driven Intelligence</p>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <form id="signupForm">
+            <input type="hidden" name="csrfToken" value="{{CSRF_TOKEN}}">
+              <div class="form-group">
+                <label for="username" class="sr-only">Username</label>
+                <input type="text" class="form-control" id="username" name="username" 
+                       placeholder="Username" required pattern="[a-zA-Z0-9_\-]{3,20}"
+                       autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="sr-only">Email</label>
+                <input type="email" class="form-control" id="email" name="email" 
+                       placeholder="Email" required
+                       autocomplete="email">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="sr-only">Password</label>
+                <input type="password" class="form-control" id="password" name="password" 
+                       placeholder="Password" required minlength="6"
+                       autocomplete="new-password">
+            </div>
+            
+            <div class="password-requirements" id="passwordRequirements" style="display: none;">
+                <div class="requirement" id="req-length">
+                    <i class="fas fa-times"></i>
+                    <span>At least 6 characters</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword" class="sr-only">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
+                       placeholder="Confirm Password" required
+                       autocomplete="new-password">
+            </div>
+            
+            <div class="requirement" id="req-match" style="display: none;">
+                <i class="fas fa-times"></i>
+                <span>Passwords match</span>
+            </div>
+            
+            <button type="submit" class="btn btn-signup" id="signupBtn">
+                <span class="loading-spinner">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </span>
+                <span class="btn-text">Create Account</span>
+            </button>
+        </form>
+        
+        <div class="login-link">
+            <p>Already have an account? <a href="/auth/login">Sign in here</a></p>
+        </div>
+        
+        <div class="csrf-info">
+            Protected by CSRF token
+        </div>
+    </div>    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/bootstrap-4.6.2.min.js"></script>
+    
+    <script>        $(document).ready(function() {
+            const $form = $('#signupForm');
+            const $alertContainer = $('#alertContainer');
+            const $signupBtn = $('#signupBtn');
+              const $username = $('#username');
+            const $email = $('#email');
+            const $password = $('#password');
+            const $confirmPassword = $('#confirmPassword');
+            const $passwordReqs = $('#passwordRequirements');
+            const $reqLength = $('#req-length');
+            const $reqMatch = $('#req-match');
+            
+            // Show/hide password requirements
+            $password.on('focus', function() {
+                $passwordReqs.show();
+            });
+            
+            // Real-time password validation
+            $password.on('input', function() {
+                const password = $(this).val();
+                
+                // Length requirement
+                if (password.length >= 6) {
+                    $reqLength.removeClass('invalid').addClass('valid');
+                    $reqLength.find('i').removeClass('fa-times').addClass('fa-check');
+                } else {
+                    $reqLength.removeClass('valid').addClass('invalid');
+                    $reqLength.find('i').removeClass('fa-check').addClass('fa-times');
+                }
+                
+                validatePasswordMatch();
+            });
+            
+            // Password confirmation validation
+            $confirmPassword.on('input', validatePasswordMatch);
+            
+            function validatePasswordMatch() {
+                const password = $password.val();
+                const confirmPassword = $confirmPassword.val();
+                
+                if (confirmPassword.length > 0) {
+                    $reqMatch.show();
+                    
+                    if (password === confirmPassword) {
+                        $reqMatch.removeClass('invalid').addClass('valid');
+                        $reqMatch.find('i').removeClass('fa-times').addClass('fa-check');
+                    } else {
+                        $reqMatch.removeClass('valid').addClass('invalid');
+                        $reqMatch.find('i').removeClass('fa-check').addClass('fa-times');
+                    }
+                } else {
+                    $reqMatch.hide();
+                }
+            }
+              // Form submission
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                  const formData = {
+                    username: $username.val().trim(),
+                    email: $email.val().trim(),
+                    password: $password.val(),
+                    confirmPassword: $confirmPassword.val(),
+                    csrfToken: $('input[name="csrfToken"]').val()
+                };
+                
+                // Debug logging
+                console.log('Form data being sent:', {
+                    username: formData.username,
+                    email: formData.email,
+                    password: formData.password ? '[PRESENT]' : '[MISSING]',
+                    confirmPassword: formData.confirmPassword ? '[PRESENT]' : '[MISSING]',
+                    csrfToken: formData.csrfToken ? '[PRESENT: ' + formData.csrfToken.substring(0, 10) + '...]' : '[MISSING]'
+                });
+                
+                // Client-side validation
+                if (!validateForm(formData)) {
+                    return;
+                }
+                  // Show loading state
+                $signupBtn.prop('disabled', true);
+                $('.btn-text').text('Creating...');
+                $('.loading-spinner').show();
+                hideAlert();
+                  // Submit form
+                $.ajax({
+                    url: '/auth/signup',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        console.log('Signup success response:', response);
+                        if (response.success) {
+                            showAlert('success', response.message || 'Registration successful!');
+                            
+                            // Redirect after a short delay
+                            setTimeout(function() {
+                                window.location.href = response.redirectUrl || '/auth/login';
+                            }, 1500);
+                        } else {
+                            showAlert('danger', response.message || 'Registration failed');
+                            resetButton();
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log('Signup error response:', xhr);
+                        let message = 'Registration failed';
+                        
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        } else if (xhr.status === 409) {
+                            message = 'Username already exists';
+                        } else if (xhr.status === 400) {
+                            message = 'Invalid input data';
+                        }
+                        
+                        showAlert('danger', message);
+                        resetButton();
+                    }
+                });
+            });
+              function validateForm(data) {
+                if (!data.username) {
+                    showAlert('warning', 'Username is required');
+                    return false;
+                }
+                
+                if (!/^[a-zA-Z0-9_-]{3,20}$/.test(data.username)) {
+                    showAlert('warning', 'Username must be 3-20 characters and contain only letters, numbers, underscore, and dash');
+                    return false;
+                }
+                
+                if (!data.email) {
+                    showAlert('warning', 'Email is required');
+                    return false;
+                }
+                
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                    showAlert('warning', 'Please enter a valid email address');
+                    return false;
+                }
+                
+                if (!data.password) {
+                    showAlert('warning', 'Password is required');
+                    return false;
+                }
+                
+                if (data.password.length < 6) {
+                    showAlert('warning', 'Password must be at least 6 characters long');
+                    return false;
+                }
+                
+                if (data.password !== data.confirmPassword) {
+                    showAlert('warning', 'Passwords do not match');
+                    return false;
+                }
+                
+                return true;
+            }
+              function showAlert(type, message) {
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                `;
+                
+                $alertContainer.html(alertHtml);
+            }
+            
+            function hideAlert() {
+                $alertContainer.empty();
+            }
+              function resetButton() {
+                $signupBtn.prop('disabled', false);
+                $('.btn-text').text('Create Account');
+                $('.loading-spinner').hide();
+            }
+        });
+    </script>
+</body>
+</html>
