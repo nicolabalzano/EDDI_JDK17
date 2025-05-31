@@ -301,8 +301,15 @@ $(function () {
     };
 
     const deployBot = function (environment, botId, botVersion) {
-        $.post('/administration/' + environment + '/deploy/' + botId + '?version=' + botVersion).done(function () {
-            checkBotDeploymentStatus();
+        $.ajax({
+            type: 'POST',
+            url: '/administration/' + environment + '/deploy/' + botId + '?version=' + botVersion,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function() {
+                checkBotDeploymentStatus();
+            }
         });
     };
 
