@@ -1,15 +1,39 @@
-version: '3'
+version: '3.8'
 services:
   eddi:
-    image: labsai/eddi:latest
+    build:
+      context: .
+      dockerfile: "./src/main/docker/Dockerfile.jvm"
+    image: labsai/eddi:local
+    container_name: eddi
     ports:
       - "7070:7070"
       - "7443:7443"
-#      - "5005:5005"
-    links:
-      - mongodb
+    environment:
+      - QUARKUS_PROFILE=prod
+      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017/eddi
     depends_on:
       - mongodb
+    networks:
+      - eddi-network
+    restart: unless-stopped
+
   mongodb:
     image: mongo:4.2
-    restart: always
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=eddi
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - eddi-network
+    restart: unless-stopped
+
+networks:
+  eddi-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

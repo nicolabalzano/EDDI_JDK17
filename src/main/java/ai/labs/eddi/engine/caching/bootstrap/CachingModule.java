@@ -1,13 +1,11 @@
 package ai.labs.eddi.engine.caching.bootstrap;
 
-import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.manager.EmbeddedCacheManager;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Cache;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Produces;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ginccc
@@ -16,8 +14,21 @@ import java.nio.file.Paths;
 public class CachingModule {
     @Produces
     @ApplicationScoped
-    EmbeddedCacheManager provideEmbeddedCacheManager() throws IOException {
-        Path path = Paths.get("infinispan.xml");
-        return new DefaultCacheManager(path.toString(), true);
+    CaffeineEmbeddedCacheManager provideEmbeddedCacheManager() {
+        return new CaffeineEmbeddedCacheManager();
+    }
+    
+    // Wrapper class per simulare EmbeddedCacheManager con Caffeine
+    public static class CaffeineEmbeddedCacheManager {
+        public <K, V> Cache<K, V> getCache(String cacheName, boolean createIfAbsent) {
+            return getCache();
+        }
+        
+        public <K, V> Cache<K, V> getCache() {
+            return Caffeine.newBuilder()
+                .maximumSize(1000)
+                .expireAfterWrite(30, TimeUnit.MINUTES)
+                .build();
+        }
     }
 }

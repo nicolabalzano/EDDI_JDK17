@@ -1,8 +1,8 @@
 package ai.labs.eddi.engine.caching;
 
+import ai.labs.eddi.engine.caching.bootstrap.CachingModule.CaffeineEmbeddedCacheManager;
 import lombok.Getter;
-import org.infinispan.Cache;
-import org.infinispan.manager.EmbeddedCacheManager;
+import com.github.benmanes.caffeine.cache.Cache;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -11,10 +11,10 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class CacheFactory implements ICacheFactory {
     @Getter
-    private final EmbeddedCacheManager cacheManager;
+    private final CaffeineEmbeddedCacheManager cacheManager;
 
     @Inject
-    public CacheFactory(EmbeddedCacheManager cacheManager) {
+    public CacheFactory(CaffeineEmbeddedCacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
 
@@ -27,6 +27,6 @@ public class CacheFactory implements ICacheFactory {
             cache = this.cacheManager.getCache();
         }
 
-        return new CacheImpl<>(cacheName, cache);
+        return new CaffeineCache<>(cacheName, cache);
     }
 }
