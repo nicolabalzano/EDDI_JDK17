@@ -31,9 +31,13 @@ public class CsrfTokenService {
         
         return token;
     }
-    
-    public boolean validateToken(String token) {
+      public boolean validateToken(String token) {
         if (token == null || token.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Validate token format to prevent XSS attacks
+        if (!isValidTokenFormat(token)) {
             return false;
         }
         
@@ -65,10 +69,53 @@ public class CsrfTokenService {
         }
         return null;
     }
-    
-    private void cleanupExpiredTokens() {
+      private void cleanupExpiredTokens() {
         long currentTime = System.currentTimeMillis();
         tokenStore.entrySet().removeIf(entry -> 
             (currentTime - entry.getValue()) > TOKEN_VALIDITY_DURATION);
+    }
+    
+    /**
+     * Validates token format to prevent XSS attacks.
+     * CSRF tokens should only contain Base64 URL-safe characters.
+     * 
+     * @param token The token to validate
+     * @return true if token format is safe, false otherwise
+     */
+    private boolean isValidTokenFormat(String token) {
+        if (token == null || token.length() == 0) {
+            return false;
+        }
+        
+        // Check length bounds (Base64 encoded 32 bytes should be ~43 characters)
+        if (token.length() < 20 || token.length() > 100) {
+            return false;
+        }
+        
+        // Check for Base64 URL-safe characters only: A-Z, a-z, 0-9, -, _
+        // This prevents XSS through malicious characters
+        return token.matches("^[A-Za-z0-9_-]+$");
+    }
+    
+    /**
+     * Safely logs token information without exposing the full token value.
+     * Used to prevent XSS attacks through log injection.
+     * 
+     * @param token The token to log safely
+     * @return A safe representation of the token for logging
+     */
+    public static String getTokenLogRepresentation(String token) {
+        if (token == null) {
+            return "[NULL]";
+        }
+        if (token.trim().isEmpty()) {
+            return "[EMPTY]";
+        }
+        if (token.length() < 6) {
+            return "[TOO_SHORT]";
+        }
+        
+        // Show only first 6 characters to prevent log-based XSS
+        return "[" + token.substring(0, 6) + "..." + token.length() + "chars]";
     }
 }

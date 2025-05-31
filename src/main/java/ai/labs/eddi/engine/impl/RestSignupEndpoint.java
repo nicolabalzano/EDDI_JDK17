@@ -4,6 +4,7 @@ import ai.labs.eddi.engine.ISignupEndpoint;
 import ai.labs.eddi.engine.dto.SignupRequest;
 import ai.labs.eddi.engine.security.AuthenticationService;
 import ai.labs.eddi.engine.security.CsrfTokenService;
+import ai.labs.eddi.engine.security.HtmlSecurityUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -52,10 +53,9 @@ public class RestSignupEndpoint implements ISignupEndpoint {
             }
             
             // Read the HTML content
-            String htmlContent = new String(signupPageStream.readAllBytes(), StandardCharsets.UTF_8);
-            
-            // Replace the CSRF token placeholder
-            htmlContent = htmlContent.replace("{{CSRF_TOKEN}}", csrfToken);
+            String htmlContent = new String(signupPageStream.readAllBytes(), StandardCharsets.UTF_8);              // Replace the CSRF token placeholder with HTML-escaped value
+            String escapedToken = HtmlSecurityUtils.escapeHtml(csrfToken);
+            htmlContent = htmlContent.replace("{{CSRF_TOKEN}}", escapedToken);
             
             return Response.ok(htmlContent)
                     .type("text/html")
@@ -83,18 +83,17 @@ public class RestSignupEndpoint implements ISignupEndpoint {
         String confirmPassword = signupRequest.getConfirmPassword();
         String email = signupRequest.getEmail();
         String csrfToken = signupRequest.getCsrfToken();
-        
-        log.info("Username: " + username);
+          log.info("Username: " + username);
         log.info("Email: " + email);
         log.info("Password present: " + (password != null && !password.isEmpty()));
         log.info("Confirm password present: " + (confirmPassword != null && !confirmPassword.isEmpty()));
-        log.info("CSRF token: " + csrfToken);
+        log.info("CSRF token: " + CsrfTokenService.getTokenLogRepresentation(csrfToken));
         log.info("CSRF token present: " + (csrfToken != null && !csrfToken.trim().isEmpty()));
         
         try {
             // Validate CSRF token
             if (!csrfTokenService.validateToken(csrfToken)) {
-                log.warn("CSRF token validation FAILED for user: " + username + ", token: " + csrfToken);
+                log.warn("CSRF token validation FAILED for user: " + username + ", token: " + CsrfTokenService.getTokenLogRepresentation(csrfToken));
                 return Response.status(Response.Status.FORBIDDEN)
                         .entity(createErrorResponse("Invalid CSRF token"))
                         .build();
@@ -174,9 +173,7 @@ public class RestSignupEndpoint implements ISignupEndpoint {
         }
         
         return null; // No validation errors
-    }
-    
-    private Map<String, Object> createErrorResponse(String message) {
+    }    private Map<String, Object> createErrorResponse(String message) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", false);
         response.put("message", message);

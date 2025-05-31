@@ -1,0 +1,5 @@
+aggiungere nella doc il contenuto riscritto del file AUTHTENTICATION.md
+
+scrivere nella doc la SSTI con le immagini e mitigarla
+
+modificare gli header delle request per mitigare le xss (chiedere a claude sonnet 4 che fa una mega classe generale)

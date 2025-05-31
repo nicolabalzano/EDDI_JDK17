@@ -4,6 +4,7 @@ import ai.labs.eddi.engine.ILoginEndpoint;
 import ai.labs.eddi.engine.dto.LoginRequest;
 import ai.labs.eddi.engine.security.AuthenticationService;
 import ai.labs.eddi.engine.security.CsrfTokenService;
+import ai.labs.eddi.engine.security.HtmlSecurityUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.NewCookie;
@@ -45,10 +46,9 @@ public class RestLoginEndpoint implements ILoginEndpoint {
             }
             
             // Read the HTML content
-            String htmlContent = new String(loginPageStream.readAllBytes(), StandardCharsets.UTF_8);
-            
-            // Replace the CSRF token placeholder
-            htmlContent = htmlContent.replace("{{CSRF_TOKEN}}", csrfToken);
+            String htmlContent = new String(loginPageStream.readAllBytes(), StandardCharsets.UTF_8);            // Replace the CSRF token placeholder with HTML-escaped value
+            String escapedToken = HtmlSecurityUtils.escapeHtml(csrfToken);
+            htmlContent = htmlContent.replace("{{CSRF_TOKEN}}", escapedToken);
             
             return Response.ok(htmlContent)
                     .type("text/html")
@@ -146,11 +146,9 @@ public class RestLoginEndpoint implements ILoginEndpoint {
                     .build();
         }
     }
-    
-    private Map<String, Object> createErrorResponse(String message) {
+      private Map<String, Object> createErrorResponse(String message) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", false);
         response.put("message", message);
-        return response;
-    }
+        return response;    }
 }
