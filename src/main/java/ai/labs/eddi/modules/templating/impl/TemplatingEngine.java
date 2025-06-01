@@ -1,6 +1,7 @@
 package ai.labs.eddi.modules.templating.impl;
 
 import ai.labs.eddi.modules.templating.ITemplatingEngine;
+import ai.labs.eddi.modules.templating.security.SecureTemplateConfiguration;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.exceptions.TemplateInputException;
@@ -21,8 +22,7 @@ public class TemplatingEngine implements ITemplatingEngine {
     private final TextTemplateEngine textTemplateEngine;
     private final HtmlTemplateEngine htmlTemplateEngine;
     private final JavaScriptTemplateEngine javaScriptTemplateEngine;
-
-    @Inject
+    private final SecureTemplateConfiguration secureConfig;    @Inject
     public TemplatingEngine(TextTemplateEngine textTemplateEngine,
                             HtmlTemplateEngine htmlTemplateEngine,
                             JavaScriptTemplateEngine javaScriptTemplateEngine) {
@@ -30,20 +30,27 @@ public class TemplatingEngine implements ITemplatingEngine {
         this.textTemplateEngine = textTemplateEngine;
         this.htmlTemplateEngine = htmlTemplateEngine;
         this.javaScriptTemplateEngine = javaScriptTemplateEngine;
+        this.secureConfig = new SecureTemplateConfiguration();
     }
 
     @Override
     public String processTemplate(String template,
                                   Map<String, Object> dynamicAttributesMap) throws TemplateEngineException {
         return processTemplate(template, dynamicAttributesMap, TemplateMode.TEXT);
-    }
-
-    @Override
+    }    @Override
     public String processTemplate(String template,
                                   Map<String, Object> dynamicAttributesMap,
                                   TemplateMode templateMode) throws TemplateEngineException {
+          // SECURITY: Validate template content before processing
+        if (!secureConfig.validateTemplateContent(template)) {
+            throw new TemplateEngineException("Template contains potentially dangerous content and was blocked for security reasons", null);
+        }
+        
+        // SECURITY: Sanitize template variables
+        Map<String, Object> sanitizedVariables = secureConfig.sanitizeTemplateVariables(dynamicAttributesMap);
+        
         final Context ctx = new Context(Locale.ENGLISH);
-        dynamicAttributesMap.forEach(ctx::setVariable);
+        sanitizedVariables.forEach(ctx::setVariable);
         try {
             if (containsTemplatingControlCharacters(template)) {
                 return getTemplateEngine(templateMode).process(template, ctx);

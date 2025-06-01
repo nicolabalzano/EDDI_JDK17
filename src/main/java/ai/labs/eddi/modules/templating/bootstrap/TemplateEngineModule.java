@@ -7,6 +7,7 @@ import ai.labs.eddi.modules.templating.impl.HtmlTemplateEngine;
 import ai.labs.eddi.modules.templating.impl.JavaScriptTemplateEngine;
 import ai.labs.eddi.modules.templating.impl.JsonSerializationThymeleafDialect;
 import ai.labs.eddi.modules.templating.impl.TextTemplateEngine;
+import ai.labs.eddi.modules.templating.security.SecureTemplateConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.runtime.Startup;
 import org.jboss.logging.Logger;
@@ -27,16 +28,14 @@ import java.util.Map;
  */
 @Startup(1000)
 @ApplicationScoped
-public class TemplateEngineModule {
-
-    private static final Logger LOGGER = Logger.getLogger("Startup");
+public class TemplateEngineModule {    private static final Logger LOGGER = Logger.getLogger("Startup");
     private final Map<String, Provider<ILifecycleTask>> lifecycleTaskProviders;
     private final Instance<ILifecycleTask> instance;
-
-    public TemplateEngineModule(@LifecycleExtensions Map<String, Provider<ILifecycleTask>> lifecycleTaskProviders,
+    private final SecureTemplateConfiguration secureConfig;    public TemplateEngineModule(@LifecycleExtensions Map<String, Provider<ILifecycleTask>> lifecycleTaskProviders,
                                 Instance<ILifecycleTask> instance) {
         this.lifecycleTaskProviders = lifecycleTaskProviders;
         this.instance = instance;
+        this.secureConfig = new SecureTemplateConfiguration();
     }
 
     @PostConstruct
@@ -62,14 +61,17 @@ public class TemplateEngineModule {
     @Produces
     public JavaScriptTemplateEngine provideJavaScriptTemplateEngine(ObjectMapper objectMapper) {
         return new JavaScriptTemplateEngine(createTemplateEngine(TemplateMode.JAVASCRIPT, objectMapper));
-    }
-
-    private TemplateEngine createTemplateEngine(TemplateMode templateMode, ObjectMapper objectMapper) {
+    }    private TemplateEngine createTemplateEngine(TemplateMode templateMode, ObjectMapper objectMapper) {
         TemplateEngine templateEngine = new TemplateEngine();
         templateEngine.addDialect(new JsonSerializationThymeleafDialect(objectMapper));
         StringTemplateResolver templateResolver = new StringTemplateResolver();
         templateResolver.setTemplateMode(templateMode);
         templateEngine.addTemplateResolver(templateResolver);
+
+        // Apply security configuration to prevent SSTI attacks
+        secureConfig.configureSecureTemplate(templateEngine);
+        
+        LOGGER.info("Created secure TemplateEngine for mode: " + templateMode + " with SSTI protections");
 
         return templateEngine;
     }
