@@ -93,7 +93,7 @@ public class SecureTemplateConfiguration {
         }
         
         // Check for dangerous type expressions (T() operator)
-        if (template.contains("T(") || template.contains("#{T(")) {
+        if (template.contains("T(") || template.contains("#{T(") || template.contains("#ctx")) {
             LOGGER.warning("Blocked template containing T() type expression: potential SSTI attempt");
             return false;
         }
