@@ -80,6 +80,68 @@ public class SecureTemplateConfiguration {
         
         LOGGER.info("Secure Thymeleaf configuration applied successfully");
     }
+      /**
+     * Sanitizes template content by replacing dangerous patterns with safe placeholders.
+     * 
+     * @param template The template content to sanitize
+     * @return Sanitized template content with dangerous patterns replaced
+     */    public String sanitizeTemplateContent(String template) {
+        if (template == null || template.trim().isEmpty()) {
+            return template;
+        }
+        
+        LOGGER.info("SECURITY: Starting sanitization of template content: " + template);
+        String sanitized = template;
+        
+        // Replace dangerous type expressions (T() operator)
+        if (sanitized.contains("T(") || sanitized.contains("#{T(") || sanitized.contains("#ctx")) {
+            LOGGER.warning("Sanitizing template containing T() type expression: potential SSTI attempt");
+            sanitized = sanitized.replaceAll("T\\([^)]*\\)", "CONTENT NOT ALLOWED");
+            sanitized = sanitized.replaceAll("#\\{T\\([^}]*\\)\\}", "CONTENT NOT ALLOWED");
+            sanitized = sanitized.replace("#ctx", "CONTENT NOT ALLOWED");
+        }
+        
+        // Replace OGNL expressions which should not be present
+        if (sanitized.contains("@") && sanitized.contains("@java.")) {
+            LOGGER.warning("Sanitizing template containing OGNL @ expressions: potential SSTI attempt");
+            sanitized = sanitized.replaceAll("@java\\.[^\\s]*", "CONTENT NOT ALLOWED");
+        }
+        
+        // Replace dangerous class references
+        for (String blacklistedClass : BLACKLISTED_CLASSES) {
+            if (sanitized.contains(blacklistedClass)) {
+                LOGGER.warning("Sanitizing template containing blacklisted class: " + blacklistedClass);
+                sanitized = sanitized.replace(blacklistedClass, "CONTENT NOT ALLOWED");
+            }
+        }
+        
+        // Replace dangerous method calls
+        for (String blacklistedMethod : BLACKLISTED_METHODS) {
+            if (sanitized.contains(blacklistedMethod + "(")) {
+                LOGGER.warning("Sanitizing template containing blacklisted method: " + blacklistedMethod);
+                sanitized = sanitized.replaceAll(blacklistedMethod + "\\([^)]*\\)", "CONTENT NOT ALLOWED");
+            }
+        }        // Replace script injections - improved patterns
+        if (sanitized.toLowerCase().contains("<script") || 
+            sanitized.toLowerCase().contains("javascript:") ||
+            sanitized.toLowerCase().contains("vbscript:") ||
+            sanitized.toLowerCase().contains("onclick") ||
+            sanitized.toLowerCase().contains("onload")) {
+            LOGGER.warning("Sanitizing template containing script injection attempt");
+            
+            // Simple and effective: replace any occurrence of script tags
+            sanitized = sanitized.replaceAll("(?i)<script", "CONTENT NOT ALLOWED");
+            sanitized = sanitized.replaceAll("(?i)</script>", "CONTENT NOT ALLOWED");
+            sanitized = sanitized.replaceAll("(?i)javascript:", "CONTENT NOT ALLOWED");
+            sanitized = sanitized.replaceAll("(?i)vbscript:", "CONTENT NOT ALLOWED");
+            
+            // Replace event handlers
+            sanitized = sanitized.replaceAll("(?i)on\\w+\\s*=", "CONTENT NOT ALLOWED");
+        }
+        
+        LOGGER.info("SECURITY: Sanitization completed. Original: '" + template + "' -> Sanitized: '" + sanitized + "'");
+        return sanitized;
+    }
     
     /**
      * Validates template content before processing to detect potential SSTI payloads.

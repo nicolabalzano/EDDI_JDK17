@@ -41,10 +41,8 @@ public class TemplatingEngine implements ITemplatingEngine {
     public String processTemplate(String template,
                                   Map<String, Object> dynamicAttributesMap,
                                   TemplateMode templateMode) throws TemplateEngineException {
-          // SECURITY: Validate template content before processing
-        if (!secureConfig.validateTemplateContent(template)) {
-            throw new TemplateEngineException("Template contains potentially dangerous content and was blocked for security reasons", null);
-        }
+        // SECURITY: Sanitize template content FIRST (replace dangerous patterns with "CONTENT NOT ALLOWED")
+        String sanitizedTemplate = secureConfig.sanitizeTemplateContent(template);
         
         // SECURITY: Sanitize template variables
         Map<String, Object> sanitizedVariables = secureConfig.sanitizeTemplateVariables(dynamicAttributesMap);
@@ -52,10 +50,10 @@ public class TemplatingEngine implements ITemplatingEngine {
         final Context ctx = new Context(Locale.ENGLISH);
         sanitizedVariables.forEach(ctx::setVariable);
         try {
-            if (containsTemplatingControlCharacters(template)) {
-                return getTemplateEngine(templateMode).process(template, ctx);
+            if (containsTemplatingControlCharacters(sanitizedTemplate)) {
+                return getTemplateEngine(templateMode).process(sanitizedTemplate, ctx);
             } else {
-                return template;
+                return sanitizedTemplate;
             }
         } catch (TemplateInputException e) {
             String message = "Error trying to insert context information into template. " +
