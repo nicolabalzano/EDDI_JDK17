@@ -29,11 +29,26 @@ public class RestUtilities {
         return new NoLogWebApplicationException(builder.build());
     }
 
+    private static String sanitizeUriPart(Object uriPart) {
+        if (uriPart == null) return "";
+        String s = uriPart.toString();
+        // Remove control chars, trim spaces
+        s = s.replaceAll("[\\p{Cntrl}]", "").trim();
+        // Replace backslashes with slashes
+        s = s.replace('\\', '/');
+        // Remove path traversal and duplicate slashes
+        s = s.replaceAll("\\.\\.", "");
+        s = s.replaceAll("/{2,}", "/");
+        // Encode characters not allowed in URI path
+        s = s.replaceAll("[^a-zA-Z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=]", "");
+        return s;
+    }
+
     public static URI createURI(Object... uriParts) {
         StringBuilder sb = new StringBuilder();
 
         for (Object uriPart : uriParts) {
-            sb.append(uriPart.toString());
+            sb.append(sanitizeUriPart(uriPart));
         }
 
         return URI.create(sb.toString());

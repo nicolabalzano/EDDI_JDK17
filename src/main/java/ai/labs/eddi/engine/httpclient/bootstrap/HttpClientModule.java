@@ -10,8 +10,12 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import java.util.Arrays;
 
+//import to do log.error
+import org.jboss.logging.Logger;
+
 @ApplicationScoped
 public class HttpClientModule {
+    private static final Logger log = Logger.getLogger(HttpClientModule.class);
 
     @Inject
     ManagedExecutor executorService;
@@ -39,8 +43,10 @@ public class HttpClientModule {
 
             return new JettyHttpClient(httpClient);
         } catch (Exception e) {
-            System.out.println(Arrays.toString(e.getStackTrace()));
-            throw new RuntimeException(e.getLocalizedMessage(), e);
+            //System.out.println(Arrays.toString(e.getStackTrace()));
+            //throw new RuntimeException(e.getLocalizedMessage(), e);
+            log.error("Failed to create HttpClient");
+            return null;
         }
     }
 
@@ -55,7 +61,7 @@ public class HttpClientModule {
                 } catch (Throwable e) {
                     String message = "HttpClient did not stop as expected.";
                     System.out.println(message);
-                    System.out.println(Arrays.toString(e.getStackTrace()));
+                    //System.out.println(Arrays.toString(e.getStackTrace()));
                 }
             }
         });

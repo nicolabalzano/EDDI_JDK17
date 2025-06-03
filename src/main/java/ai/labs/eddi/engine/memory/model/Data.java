@@ -7,7 +7,8 @@ import lombok.Setter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
+//import java.util.Random;
+import java.security.SecureRandom;
 
 /**
  * @author ginccc
@@ -44,8 +45,8 @@ public class Data<T> implements IData<T> {
 
     private T chooseRandomResult(List<T> results) {
         if (!results.isEmpty()) {
-            Random random = new Random();
-            int randNumber = random.nextInt(results.size());
+            SecureRandom secureRandom = new SecureRandom();
+            int randNumber = secureRandom.nextInt(results.size());
             return results.get(randNumber);
         }
 

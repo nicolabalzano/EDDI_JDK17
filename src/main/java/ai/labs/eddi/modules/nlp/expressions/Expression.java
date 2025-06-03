@@ -163,7 +163,8 @@ public class Expression implements Cloneable {
             Object clone = this.clone();
             return (Expression) clone;
         } catch (CloneNotSupportedException e) {
-            log.error("Cloning error!", e);
+            //log.error("Cloning error!", e);
+            log.error("Cloning error!");
         }
         return null;
     }
