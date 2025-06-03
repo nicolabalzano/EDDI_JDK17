@@ -214,11 +214,22 @@ class ConversationEnd {
 }
 
 function createAnswerMessage(answer) {
-    let htmlWrapperBeginning = "<div class=\"line\"><div class=\"message message-right animated fadeInUp bubbleRight\">",
-        htmlWrapperEnding = "</div></div><div class=\"clear\"></div>";
-
+    // Rimuovi quick replies esistenti
     $('.quickReply').remove();
-    $('#chat-container').append(htmlWrapperBeginning + answer + htmlWrapperEnding);
+    
+    // Crea gli elementi DOM in modo sicuro
+    const $line = $('<div>').addClass('line');
+    const $messageContainer = $('<div>').addClass('message message-right animated fadeInUp bubbleRight');
+    const $clear = $('<div>').addClass('clear');
+    
+    // Usa .text() invece di concatenazione HTML per escape automatico
+    $messageContainer.text(answer);
+    
+    // Assembla la struttura
+    $line.append($messageContainer);
+    
+    // Aggiungi al container principale
+    $('#chat-container').append($line).append($clear);
 }
 
 

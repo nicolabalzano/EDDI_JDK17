@@ -35,7 +35,8 @@ public class SessionAuthenticationFilter implements ContainerRequestFilter {
       // Paths that don't require authentication
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
         "/auth/login",
-        "/auth/signup",
+        "/auth/signup"
+        /*
         "/auth/logout", 
         "/auth/csrf-token",
         "/q/metrics",
@@ -47,7 +48,7 @@ public class SessionAuthenticationFilter implements ContainerRequestFilter {
         "/js",
         "/img",
         "/openapi",
-        "/q/swagger-ui"
+        "/q/swagger-ui"*/
     );
     
     @Override
