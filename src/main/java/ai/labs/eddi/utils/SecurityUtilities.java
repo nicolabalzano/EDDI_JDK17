@@ -5,6 +5,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import javax.security.auth.Subject;
 import java.security.Principal;
+import java.security.SecureRandom;
 import java.util.Set;
 
 /**
@@ -63,12 +64,13 @@ public class SecurityUtilities {
 
     @Deprecated
     private static String generateSalt(int length, char[] allowedChars) {
+        SecureRandom secureRandom = new SecureRandom();
         StringBuilder finalSalt = new StringBuilder();
         int random;
 
         for (int i = 0; i < length; i++) {
-            random = new java.util.Random().nextInt(allowedChars.length - 1);
-            finalSalt.append(allowedChars[random]);
+            int randomIndex = secureRandom.nextInt(allowedChars.length);
+            finalSalt.append(allowedChars[randomIndex]);
         }
 
         return finalSalt.toString();

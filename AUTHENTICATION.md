@@ -178,6 +178,8 @@ The system automatically creates default users on first startup:
 ### What is CSRF?
 Cross-Site Request Forgery (CSRF) is an attack where malicious websites trick users into performing unwanted actions on authenticated websites. For example, a malicious site could submit a form to change a user's password without their knowledge.
 
+Se non c'è la pagina di login, il token ovviamente non c'è, chiunque potrebbe fare richieste a qualsiasi end point e fare il deploy di un modello che è ancora in fase di testing e presenta una vulnerabilità al suo interno
+
 ### Our CSRF Protection Implementation
 
 1. **Token Generation**: Each form receives a unique, unpredictable CSRF token

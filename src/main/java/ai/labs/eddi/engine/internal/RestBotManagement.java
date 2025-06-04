@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import java.security.SecureRandom;
+
 import static ai.labs.eddi.models.Deployment.Environment.unrestricted;
 
 @ApplicationScoped
@@ -262,7 +264,7 @@ public class RestBotManagement implements IRestBotManagement {
     }
 
     private BotDeployment getRandom(List<BotDeployment> botDeployments) {
-        return botDeployments.get(new Random().nextInt(botDeployments.size()));
+        return botDeployments.get(new SecureRandom().nextInt(botDeployments.size()));
     }
 
     private BotTriggerConfiguration getBotTrigger(String intent) {

@@ -34,6 +34,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.security.SecureRandom;
 
 import static ai.labs.eddi.engine.memory.ContextUtilities.retrieveContextLanguageFromLongTermMemory;
 import static java.lang.String.format;
@@ -263,7 +264,7 @@ public class OutputGenerationTask implements ILifecycleTask {
     }
 
     private OutputItem chooseRandomly(List<OutputItem> possibleValues) {
-        return possibleValues.get(new Random().nextInt(possibleValues.size()));
+        return possibleValues.get(new SecureRandom().nextInt(possibleValues.size()));
     }
 
     private int countActionOccurrences(IConversationStepStack conversationStepStack,

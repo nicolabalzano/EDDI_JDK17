@@ -7,7 +7,7 @@ services:
     image: labsai/eddi:local
     container_name: eddi
     ports:
-      - "7070:7070"
+      - "7071:7070"
       - "7443:7443"
     environment:
       - QUARKUS_PROFILE=prod
