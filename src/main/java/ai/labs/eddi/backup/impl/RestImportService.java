@@ -29,6 +29,7 @@ import ai.labs.eddi.engine.runtime.client.factory.RestInterfaceFactory;
 import ai.labs.eddi.models.BotDeploymentStatus;
 import ai.labs.eddi.models.DocumentDescriptor;
 import ai.labs.eddi.utils.FileUtilities;
+import ai.labs.eddi.utils.PathSecurityUtils;
 import ai.labs.eddi.utils.RestUtilities;
 import org.bson.Document;
 import org.jboss.logging.Logger;
@@ -176,16 +177,16 @@ public class RestImportService extends AbstractBackupService implements IRestImp
                 botPathString.lastIndexOf(BOT_FILE_ENDING));
 
         return URI.create(IRestBotStore.resourceURI + oldBotId + IRestBotStore.versionQueryParam + "1");
-    }
-
-    private void parsePackage(String targetDirPath, URI packageUri, BotConfiguration
+    }    private void parsePackage(String targetDirPath, URI packageUri, BotConfiguration
             botConfiguration, AsyncResponse response) {
         try {
             IResourceId packageResourceId = RestUtilities.extractResourceId(packageUri);
             String packageId = packageResourceId.getId();
-            String packageVersion = String.valueOf(packageResourceId.getVersion());
-
-            Files.newDirectoryStream(Paths.get(FileUtilities.buildPath(targetDirPath, packageId, packageVersion)),
+            String packageVersion = String.valueOf(packageResourceId.getVersion());            // Validate path components to prevent path traversal attacks
+            PathSecurityUtils.validatePathComponents(packageId, packageVersion);
+            String securePath = PathSecurityUtils.buildSecurePath(targetDirPath, packageId, packageVersion);
+            
+            Files.newDirectoryStream(Paths.get(securePath),
                             packageFilePath -> packageFilePath.toString().endsWith(".package.json")).
                     forEach(packageFilePath -> {
                         try {
@@ -254,14 +255,15 @@ public class RestImportService extends AbstractBackupService implements IRestImp
                             updateDocumentDescriptor(packagePath, packageUri, newPackageUri);
                             botConfiguration.setPackages(botConfiguration.getPackages().stream().
                                     map(uri -> uri.equals(packageUri) ? newPackageUri : uri).
-                                    collect(Collectors.toList()));
-
-                        } catch (IOException | RestInterfaceFactory.RestInterfaceFactoryException |
+                                    collect(Collectors.toList()));                        } catch (IOException | RestInterfaceFactory.RestInterfaceFactoryException |
                                  CallbackMatcher.CallbackMatcherException e) {
                             log.error(e.getLocalizedMessage(), e);
                             response.resume(new InternalServerErrorException());
                         }
                     });
+        } catch (SecurityException e) {
+            log.error("Path traversal attack detected: " + e.getLocalizedMessage(), e);
+            response.resume(new InternalServerErrorException());
         } catch (IOException e) {
             log.error(e.getLocalizedMessage(), e);
             response.resume(new InternalServerErrorException());
@@ -366,18 +368,19 @@ public class RestImportService extends AbstractBackupService implements IRestImp
 
                 PatchInstruction<DocumentDescriptor> patchInstruction = new PatchInstruction<>();
                 patchInstruction.setOperation(PatchInstruction.PatchOperation.SET);
-                patchInstruction.setDocument(oldDocumentDescriptor);
-
-                restDocumentDescriptorStore.patchDescriptor(newResourceId.getId(), newResourceId.getVersion(), patchInstruction);
+                patchInstruction.setDocument(oldDocumentDescriptor);                restDocumentDescriptorStore.patchDescriptor(newResourceId.getId(), newResourceId.getVersion(), patchInstruction);
+            } catch (SecurityException e) {
+                log.error("Path traversal attack detected: " + e.getLocalizedMessage(), e);
             } catch (IOException e) {
                 log.error(e.getLocalizedMessage(), e);
             }
         });
-    }
-
-    private DocumentDescriptor readDocumentDescriptorFromFile(Path packagePath, IResourceId resourceId)
+    }    private DocumentDescriptor readDocumentDescriptorFromFile(Path packagePath, IResourceId resourceId)
             throws IOException {
-        Path filePath = Paths.get(FileUtilities.buildPath(packagePath.toString(), resourceId.getId() + ".descriptor.json"));
+        // Validate the resource ID to prevent path traversal attacks
+        PathSecurityUtils.validatePathComponents(resourceId.getId());
+        String secureFilePath = PathSecurityUtils.buildSecurePath(packagePath.toString(), resourceId.getId() + ".descriptor.json");
+        Path filePath = Paths.get(secureFilePath);
         String oldDocumentDescriptorFile = readFile(filePath);
         return jsonSerialization.deserialize(oldDocumentDescriptorFile, DocumentDescriptor.class);
     }
@@ -442,8 +445,12 @@ public class RestImportService extends AbstractBackupService implements IRestImp
                     if (migratedOutputDocument != null) {
                         resourceContent = jsonSerialization.serialize(migratedOutputDocument);
                     }
-                }
-                return jsonSerialization.deserialize(resourceContent, clazz);
+                }                return jsonSerialization.deserialize(resourceContent, clazz);
+            } catch (SecurityException e) {
+                log.error("Path traversal attack detected: " + e.getLocalizedMessage(), e);
+                log.error(String.format("uri is: %s", uri));
+                log.error(String.format("packagePath is: %s", packagePath));
+                return null;
             } catch (IOException e) {
                 log.error(e.getLocalizedMessage(), e);
                 log.error(String.format("uri is: %s", uri));
@@ -453,10 +460,11 @@ public class RestImportService extends AbstractBackupService implements IRestImp
                 return null;
             }
         }).collect(Collectors.toList());
-    }
-
-    private Path createResourcePath(Path packagePath, String resourceId, String extension) {
-        return Paths.get(FileUtilities.buildPath(packagePath.toString(), resourceId + "." + extension + ".json"));
+    }    private Path createResourcePath(Path packagePath, String resourceId, String extension) {
+        // Validate path components to prevent path traversal attacks
+        PathSecurityUtils.validatePathComponents(resourceId, extension);
+        String secureFilePath = PathSecurityUtils.buildSecurePath(packagePath.toString(), resourceId + "." + extension + ".json");
+        return Paths.get(secureFilePath);
     }
 
     private String readFile(Path path) throws IOException {
