@@ -13,17 +13,26 @@ public final class FileUtilities {
     }
 
     public static String readTextFromFile(File file) throws IOException {
+        final int MAX_LINE_LENGTH = 4096;
+        final int MAX_TOTAL_LENGTH = 1024 * 1024 * 10;
         BufferedReader rd = null;
-        StringBuilder ret = new StringBuilder();
+        StringBuilder ret = new StringBuilder(MAX_TOTAL_LENGTH);
+        int totalLength = 0;
         try {
             rd = new BufferedReader(new FileReader(file));
-            while (rd.ready()) {
-                ret.append(rd.readLine());
+            String line;
+            while ((line = rd.readLine()) != null) {
+                if (line.length() > MAX_LINE_LENGTH) {
+                    throw new IOException("Line too long in file: " + file.getName());
+                }
+                totalLength += line.length();
+                if (totalLength > MAX_TOTAL_LENGTH) {
+                    throw new IOException("File too large: " + file.getName());
+                }
+                ret.append(line);
                 ret.append(lineSeparator);
             }
-
             return ret.toString();
-
         } finally {
             if (rd != null) {
                 try {
@@ -36,7 +45,13 @@ public final class FileUtilities {
     }
 
     public static String buildPath(String... directories) {
-        StringBuilder ret = new StringBuilder();
+        int capacity = 0;
+        for (String directory : directories) {
+            if (directory != null) capacity += directory.length();
+        }
+        // Considera anche i separatori
+        capacity += directories.length * 2;
+        StringBuilder ret = new StringBuilder(Math.max(capacity, 64));
         for (String directory : directories) {
             ret.append(directory);
             if (!endsWith(ret, File.separator)) {

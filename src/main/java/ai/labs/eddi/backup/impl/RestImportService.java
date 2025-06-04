@@ -69,6 +69,8 @@ public class RestImportService extends AbstractBackupService implements IRestImp
     private final IMigrationManager migrationManager;
 
     private static final Logger log = Logger.getLogger(RestImportService.class);
+    private static final int MAX_LINE_LENGTH = 4096;
+    private static final int MAX_TOTAL_LENGTH = 1024 * 1024 * 10; // 10MB
 
     @Inject
     public RestImportService(IZipArchive zipArchive,
@@ -125,7 +127,15 @@ public class RestImportService extends AbstractBackupService implements IRestImp
              var br = new BufferedReader(new InputStreamReader(in))) {
 
             String resource;
+            int totalLength = 0;
             while ((resource = br.readLine()) != null) {
+                if (resource.length() > MAX_LINE_LENGTH) {
+                    throw new IOException("Line too long in resource file: " + path);
+                }
+                totalLength += resource.length();
+                if (totalLength > MAX_TOTAL_LENGTH) {
+                    throw new IOException("Resource file too large: " + path);
+                }
                 filenames.add(resource);
             }
         }
@@ -461,13 +471,21 @@ public class RestImportService extends AbstractBackupService implements IRestImp
 
     private String readFile(Path path) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder(MAX_TOTAL_LENGTH);
             String currentLine = reader.readLine();
+            int totalLength = 0;
             while (currentLine != null) {
+                if (currentLine.length() > MAX_LINE_LENGTH) {
+                    throw new IOException("Line too long in file: " + path.getFileName());
+                }
+                totalLength += currentLine.length();
+                if (totalLength > MAX_TOTAL_LENGTH) {
+                    throw new IOException("File too large: " + path.getFileName());
+                }
                 builder.append(currentLine);
+                builder.append(System.lineSeparator());
                 currentLine = reader.readLine();
             }
-
             return builder.toString();
         }
     }

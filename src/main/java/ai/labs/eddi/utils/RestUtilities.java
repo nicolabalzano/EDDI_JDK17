@@ -45,12 +45,14 @@ public class RestUtilities {
     }
 
     public static URI createURI(Object... uriParts) {
-        StringBuilder sb = new StringBuilder();
-
+        int capacity = 0;
+        for (Object uriPart : uriParts) {
+            if (uriPart != null) capacity += uriPart.toString().length();
+        }
+        StringBuilder sb = new StringBuilder(Math.max(capacity, 64));
         for (Object uriPart : uriParts) {
             sb.append(sanitizeUriPart(uriPart));
         }
-
         return URI.create(sb.toString());
     }
 
