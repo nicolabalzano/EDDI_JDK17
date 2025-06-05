@@ -3,6 +3,11 @@
 *~
 docker/data/
 
+# Environment files with sensitive data
+.env
+.env.local
+.env.production
+
 ### Java template
 *.class
 
@@ -82,3 +87,9 @@ docker/data/
 
 /tmp/import/
 /.mvn/wrapper/maven-wrapper.jar
+
+# Environment variables with sensitive data
+.env
+.env.local
+.env.production
+.env.staging

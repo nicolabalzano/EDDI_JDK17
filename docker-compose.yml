@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   eddi:
     build:
@@ -8,11 +7,13 @@ services:
     container_name: eddi
     ports:
       - "7070:7070"
-      - "7443:7443"    
+      - "7443:7443"      
     environment:
-      - QUARKUS_PROFILE=prod
-      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017/eddi
+      - QUARKUS_PROFILE=${QUARKUS_PROFILE}
+      - MONGODB_CONNECTIONSTRING=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD_ENCODED}@mongodb:27017/${MONGO_DB_NAME}?authSource=admin
+      - MONGODB_DATABASE=${MONGO_DB_NAME}
       - SQLITE_DB_PATH=/shared/reviews.db
+      - SQLITE_PASSWORD=${SQLITE_PASSWORD}
     depends_on:
       - mongodb
       - sqlite-db
@@ -28,12 +29,14 @@ services:
     ports:
       - "27017:27017"
     environment:
-      - MONGO_INITDB_DATABASE=eddi
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME}
     volumes:
       - mongodb_data:/data/db
     networks:
       - eddi-network
-    restart: unless-stopped  
+    restart: unless-stopped
   
   sqlite-db:
     image: alpine:latest

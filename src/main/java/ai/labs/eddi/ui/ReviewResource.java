@@ -25,19 +25,34 @@ public class ReviewResource {
     // SQLite database path - configurable via environment variable
     @Inject
     @ConfigProperty(name = "sqlite.db.path", defaultValue = "/tmp/reviews.db")
-    String dbPath;    
+    String dbPath;
+    
+    // SQLite password - configurable via environment variable
+    @Inject
+    @ConfigProperty(name = "sqlite.password", defaultValue = "")
+    String dbPassword;
     // Initialize database table (vulnerabile a SQL injection per design)
     public ReviewResource() {
         initializeDatabase();
-    }
-      private void initializeDatabase() {
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+    }    private void initializeDatabase() {
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, email TEXT, review TEXT)")) {
             stmt.executeUpdate();
         } catch (Exception e) {
             System.err.println("Failed to initialize database: " + e.getMessage());
         }
+    }
+    
+    private Connection getConnection() throws Exception {
+        String connectionString = "jdbc:sqlite:" + dbPath;
+        
+        // Add password to connection string if configured
+        if (dbPassword != null && !dbPassword.trim().isEmpty()) {
+            connectionString += "?password=" + dbPassword;
+        }
+        
+        return DriverManager.getConnection(connectionString);
     }@POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response submitReview(@FormParam("username") String username,
@@ -66,9 +81,8 @@ public class ReviewResource {
         username = username.trim();
         email = email.trim();
         review = review.trim();
-        
-        // Use PreparedStatement to prevent SQL injection
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+          // Use PreparedStatement to prevent SQL injection
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "INSERT INTO reviews (username, email, review) VALUES (?, ?, ?)")) {
             
@@ -89,8 +103,7 @@ public class ReviewResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<Map<String, String>> getReviews() {
         List<Map<String, String>> reviews = new ArrayList<>();
-        
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+          try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement("SELECT username, email, review FROM reviews ORDER BY id DESC");
              ResultSet rs = stmt.executeQuery()) {
             
@@ -109,7 +122,7 @@ public class ReviewResource {
         
         return reviews;
     }
-      // Escape HTML to prevent XSS
+    // Escape HTML to prevent XSS
     private String escapeHtml(String input) {
         if (input == null) return "";
         
@@ -117,6 +130,7 @@ public class ReviewResource {
                    .replace("<", "&lt;")
                    .replace(">", "&gt;")
                    .replace("\"", "&quot;")
-                   .replace("'", "&#x27;");
+                   .replace("'", "&#x27;")
+                   .replace("javascript:", "&#x6A;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;:");
     }
 }
