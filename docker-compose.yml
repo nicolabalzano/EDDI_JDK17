@@ -8,12 +8,16 @@ services:
     container_name: eddi
     ports:
       - "7070:7070"
-      - "7443:7443"
+      - "7443:7443"    
     environment:
       - QUARKUS_PROFILE=prod
       - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017/eddi
+      - SQLITE_DB_PATH=/shared/reviews.db
     depends_on:
       - mongodb
+      - sqlite-db
+    volumes:
+      - sqlite_data:/shared
     networks:
       - eddi-network
     restart: unless-stopped
@@ -29,11 +33,32 @@ services:
       - mongodb_data:/data/db
     networks:
       - eddi-network
+    restart: unless-stopped  
+  
+  sqlite-db:
+    image: alpine:latest
+    container_name: sqlite-db
+    user: "0:0"
+    command: >
+      sh -c "
+        apk add --no-cache sqlite &&
+        mkdir -p /shared &&
+        chmod 777 /shared &&
+        sqlite3 /shared/reviews.db 'CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, email TEXT, review TEXT);' &&
+        chmod 777 /shared/reviews.db &&
+        chown -R root:root /shared &&
+        chmod -R 777 /shared &&
+        tail -f /dev/null
+      "
+    volumes:
+      - sqlite_data:/shared
+    networks:
+      - eddi-network
     restart: unless-stopped
-
 networks:
   eddi-network:
     driver: bridge
 
 volumes:
   mongodb_data:
+  sqlite_data:

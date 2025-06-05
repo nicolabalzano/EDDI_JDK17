@@ -31,8 +31,7 @@ public class SessionAuthenticationFilter implements ContainerRequestFilter {
     AuthenticationService authenticationService;
     
     @ConfigProperty(name = "authorization.enabled", defaultValue = "true")
-    boolean authorizationEnabled;
-      // Paths that don't require authentication
+    boolean authorizationEnabled;    // Paths that don't require authentication
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
         "/auth/login",
         "/auth/signup"

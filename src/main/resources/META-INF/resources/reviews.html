@@ -20,7 +20,7 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item"><a class="nav-link text-color" href="/index.html">Home</a></li>
-                <li class="nav-item"><a class="nav-link text-color" href="/review.html">Lascia una Recensione</a></li>
+                <li class="nav-item"><a class="nav-link text-color" href="/review.html">Give us a feedback</a></li>
             </ul>
         </div>
     </div>
@@ -31,7 +31,7 @@
             <h4 class="mb-0">Recensioni Utenti</h4>
         </div>
         <div class="card-body">
-            <table class="table table-striped" id="reviewsTable">
+            <table class="table table-striped text-white" id="reviewsTable">
                 <thead>
                     <tr><th>Username</th><th>Email</th><th>Recensione</th></tr>
                 </thead>
@@ -52,7 +52,7 @@ $(function() {
     $.get('/api/review', function(data) {
         var rows = '';
         data.forEach(function(r) {
-            rows += '<tr><td>' + r.username + '</td><td>' + r.email + '</td><td>' + r.review + '</td></tr>';
+            rows += '<tr class="text-white"><td>' + r.username + '</td><td>' + r.email + '</td><td>' + r.review + '</td></tr>';
         });
         $('#reviewsTable tbody').html(rows);
     });
