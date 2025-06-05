@@ -125,7 +125,7 @@ public class ReviewResource {
     // Escape HTML to prevent XSS
     private String escapeHtml(String input) {
         if (input == null) return "";
-        
+        return input
         return input.replace("&", "&amp;")
                    .replace("<", "&lt;")
                    .replace(">", "&gt;")
