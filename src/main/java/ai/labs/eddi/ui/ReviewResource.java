@@ -25,6 +25,7 @@ public class ReviewResource {
     @Inject
     @ConfigProperty(name = "sqlite.db.path", defaultValue = "/tmp/reviews.db")
     String dbPath;
+<<<<<<< HEAD
 
     // Initialize database table
     public ReviewResource() {
@@ -33,6 +34,18 @@ public class ReviewResource {
 
     private void initializeDatabase() {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+=======
+    
+    // SQLite password - configurable via environment variable
+    @Inject
+    @ConfigProperty(name = "sqlite.password", defaultValue = "")
+    String dbPassword;
+    // Initialize database table (vulnerabile a SQL injection per design)
+    public ReviewResource() {
+        initializeDatabase();
+    }    private void initializeDatabase() {
+        try (Connection conn = getConnection();
+>>>>>>> f1b3339c468f8a7b4b72837ac186718ce8d56bb2
              PreparedStatement stmt = conn.prepareStatement(
                  "CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, email TEXT, review TEXT)")) {
             stmt.executeUpdate();
@@ -40,8 +53,22 @@ public class ReviewResource {
             System.err.println("Failed to initialize database: " + e.getMessage());
         }
     }
+<<<<<<< HEAD
 
     @POST
+=======
+    
+    private Connection getConnection() throws Exception {
+        String connectionString = "jdbc:sqlite:" + dbPath;
+        
+        // Add password to connection string if configured
+        if (dbPassword != null && !dbPassword.trim().isEmpty()) {
+            connectionString += "?password=" + dbPassword;
+        }
+        
+        return DriverManager.getConnection(connectionString);
+    }@POST
+>>>>>>> f1b3339c468f8a7b4b72837ac186718ce8d56bb2
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response submitReview(@FormParam("username") String username,
                                  @FormParam("email") String email,
@@ -62,12 +89,21 @@ public class ReviewResource {
                     .entity("Invalid review (max 1000 characters)")
                     .build();
         }
+<<<<<<< HEAD
         // Trim and escape inputs to prevent XSS
         username = escapeHtml(username.trim());
         email = escapeHtml(email.trim());
         review = escapeHtml(review.trim());
         // Use PreparedStatement to prevent SQL injection
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+=======
+          // Trim inputs
+        username = username.trim();
+        email = email.trim();
+        review = review.trim();
+          // Use PreparedStatement to prevent SQL injection
+        try (Connection conn = getConnection();
+>>>>>>> f1b3339c468f8a7b4b72837ac186718ce8d56bb2
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO reviews (username, email, review) VALUES (?, ?, ?)") ) {
             stmt.setString(1, username);
@@ -91,7 +127,11 @@ public class ReviewResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReviews() {
         List<Map<String, String>> reviews = new ArrayList<>();
+<<<<<<< HEAD
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+=======
+          try (Connection conn = getConnection();
+>>>>>>> f1b3339c468f8a7b4b72837ac186718ce8d56bb2
              PreparedStatement stmt = conn.prepareStatement("SELECT username, email, review FROM reviews ORDER BY id DESC");
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -111,14 +151,25 @@ public class ReviewResource {
                 .header("Content-Security-Policy", "default-src 'none'; script-src 'none'; connect-src 'self'; img-src 'self'; style-src 'self';");
         return responseBuilder.build();
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> f1b3339c468f8a7b4b72837ac186718ce8d56bb2
     // Escape HTML to prevent XSS
     private String escapeHtml(String input) {
         if (input == null) return "";
         return input.replace("&", "&amp;")
+<<<<<<< HEAD
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
                 .replace("'", "&#x27;");
+=======
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#x27;")
+                   .replace("javascript:", "&#x6A;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;:");
+>>>>>>> f1b3339c468f8a7b4b72837ac186718ce8d56bb2
     }
 }
