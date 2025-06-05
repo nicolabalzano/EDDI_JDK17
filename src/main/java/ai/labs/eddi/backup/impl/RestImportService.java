@@ -419,6 +419,13 @@ public class RestImportService extends AbstractBackupService implements IRestImp
         return restInterfaceFactory.get(clazz);
     }
 
+    private Path createResourcePath(Path packagePath, String resourceId, String extension) {
+        // Validate path components to prevent path traversal attacks
+        PathSecurityUtils.validatePathComponents(resourceId, extension);
+        String secureFilePath = PathSecurityUtils.buildSecurePath(packagePath.toString(), resourceId + "." + extension + ".json");
+        return Paths.get(secureFilePath);
+    }
+
     @SuppressWarnings("unchecked")
     private <T> List<T> readResources(List<URI> uris, Path packagePath, String extension, Class<T> clazz) {
         return uris.stream().map(uri -> {
@@ -470,14 +477,7 @@ public class RestImportService extends AbstractBackupService implements IRestImp
                 return null;
             }
         }).collect(Collectors.toList());
-    }    private Path createResourcePath(Path packagePath, String resourceId, String extension) {
-        // Validate path components to prevent path traversal attacks
-        PathSecurityUtils.validatePathComponents(resourceId, extension);
-        String secureFilePath = PathSecurityUtils.buildSecurePath(packagePath.toString(), resourceId + "." + extension + ".json");
-        return Paths.get(secureFilePath);
-    }
-
-    private String readFile(Path path) throws IOException {
+    }    private String readFile(Path path) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
             StringBuilder builder = new StringBuilder(MAX_TOTAL_LENGTH);
             String currentLine = reader.readLine();
