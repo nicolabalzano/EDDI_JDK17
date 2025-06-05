@@ -40,46 +40,6 @@ public class SecurityUtilities {
         }
     }
 
-    /**
-     * @deprecated Use hashPassword(String password) instead
-     */
-    @Deprecated
-    public static String hashPassword(String password, String salt) {
-        String unencryptedBytes = salt + password + salt;
-        return DigestUtils.sha512Hex(unencryptedBytes);
-    }
-
-    /**
-     * @deprecated BCrypt handles salt generation automatically
-     */
-    @Deprecated
-    public static String generateSalt() {
-        return generateSalt(64);
-    }
-
-    @Deprecated
-    private static String generateSalt(int length) {
-        return generateSalt(length, "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray());
-    }
-
-    @Deprecated
-    private static String generateSalt(int length, char[] allowedChars) {
-        SecureRandom secureRandom = new SecureRandom();
-        StringBuilder finalSalt = new StringBuilder();
-        int random;
-
-        for (int i = 0; i < length; i++) {
-            int randomIndex = secureRandom.nextInt(allowedChars.length);
-            finalSalt.append(allowedChars[randomIndex]);
-        }
-
-        return finalSalt.toString();
-    }
-
-    public static String calculateHash(String content) {
-        return DigestUtils.md5Hex(content);
-    }
-
     public static Principal getPrincipal(Subject subject) {
         if (subject == null) {
             return null;

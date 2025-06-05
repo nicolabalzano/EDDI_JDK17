@@ -101,34 +101,8 @@ public class AuthenticationService {
             
             boolean authenticated;
             
-            // Check if this is a legacy password format (salt:hash)
-            if (storedPasswordHash.contains(":")) {
-                // Legacy format - use old method for backward compatibility
-                String[] parts = storedPasswordHash.split(":", 2);
-                if (parts.length != 2) {
-                    return false;
-                }
-                
-                String salt = parts[0];
-                String storedHash = parts[1];
-                String providedHash = SecurityUtilities.hashPassword(password, salt);
-                authenticated = storedHash.equals(providedHash);
-                
-                // If authentication successful, migrate to BCrypt
-                if (authenticated) {
-                    try {
-                        String newBcryptHash = SecurityUtilities.hashPassword(password);
-                        user.setPasswordHash(newBcryptHash);
-                        userStore.updateUser(user);
-                        log.info("Migrated user password to BCrypt: " + username);
-                    } catch (Exception e) {
-                        log.warn("Failed to migrate password to BCrypt for user: " + username, e);
-                    }
-                }
-            } else {
-                // BCrypt format
-                authenticated = SecurityUtilities.verifyPassword(password, storedPasswordHash);
-            }
+            authenticated = SecurityUtilities.verifyPassword(password, storedPasswordHash);
+            
             
             if (authenticated) {
                 // Update last login timestamp

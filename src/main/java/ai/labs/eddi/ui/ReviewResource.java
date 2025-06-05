@@ -62,11 +62,10 @@ public class ReviewResource {
                          .entity("Recensione non valida (max 1000 caratteri)")
                          .build();
         }
-        
-        // Sanitize inputs
-        username = sanitizeInput(username.trim());
-        email = sanitizeInput(email.trim());
-        review = sanitizeInput(review.trim());
+          // Trim inputs
+        username = username.trim();
+        email = email.trim();
+        review = review.trim();
         
         // Use PreparedStatement to prevent SQL injection
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
@@ -110,17 +109,7 @@ public class ReviewResource {
         
         return reviews;
     }
-    
-    // Sanitize input to remove potentially dangerous characters
-    private String sanitizeInput(String input) {
-        if (input == null) return "";
-        
-        // Remove SQL injection characters and control characters
-        return input.replaceAll("[';\"\\\\--/*]", "")
-                   .replaceAll("[\u0000-\u001F\u007F]", "");
-    }
-    
-    // Escape HTML to prevent XSS
+      // Escape HTML to prevent XSS
     private String escapeHtml(String input) {
         if (input == null) return "";
         
