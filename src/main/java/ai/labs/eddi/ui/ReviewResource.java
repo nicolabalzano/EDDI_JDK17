@@ -127,11 +127,7 @@ public class ReviewResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReviews() {
         List<Map<String, String>> reviews = new ArrayList<>();
-<<<<<<< HEAD
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-=======
-          try (Connection conn = getConnection();
->>>>>>> f1b3339c468f8a7b4b72837ac186718ce8d56bb2
              PreparedStatement stmt = conn.prepareStatement("SELECT username, email, review FROM reviews ORDER BY id DESC");
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
