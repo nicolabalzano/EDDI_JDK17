@@ -65,6 +65,13 @@ $(function () {
     eddi.baseUri = window.location.protocol + "//" + window.location.host;
     $('#botBuilderUrl').prop('href', '/manage?apiUrl=' + encodeURIComponent(eddi.baseUri));
 
+    // Add event listener for deploy example bots button
+    $(document).on('click', '#btnDeployExampleBots', function(e) {
+        e.preventDefault();
+        eddi.deployExampleBots();
+        return false;
+    });
+
     for (let n = 0; n < eddi.environments.length; n++) {
         let environment = eddi.environments[n];
         eddi.fetchDeployedBots(environment);

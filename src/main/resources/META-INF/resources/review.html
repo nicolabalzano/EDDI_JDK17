@@ -6,20 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="LABS.AI">
-    <link rel="icon" href="/img/favicon.ico" class="js-favicon">
-    <link href="/css/bootstrap-4.6.2.min.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="/img/favicon.ico" class="js-favicon">    <link href="/css/bootstrap-5.3.6.min.css" rel="stylesheet" type="text/css">
     <link href="/css/dashboard.css" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="/js/jquery-3.6.1.min.js"></script>
-    <script type="text/javascript" src="/js/bootstrap-4.6.2.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap-5.3.6.bundle.min.js"></script>
+    <script type="text/javascript" src="/js/csrf-token.js"></script>
 </head>
 <body>
-<!-- Navigation -->
+<!-- Navigation --> 
 <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-black fixed-top">
     <div class="container">
         <img src="img/logo_high.png" alt="E.D.D.I Logo" class="eddi-logo"/>
         <h4>&nbsp;Enhanced Dialog Driven Intelligence</h4>
         <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link text-color" href="/index.html">Home</a>
                 </li>
@@ -44,20 +44,19 @@
         <div class="card-header" style="background-color: #E8AC17;">
             <h4 class="mb-0" style="color: white;">Give us a feedback</h4>
         </div>
-        <div class="card-body">
-            <form method="post" action="/api/review">
-                <div class="form-group">
+        <div class="card-body">            <form method="post" action="/api/review">
+                <div class="mb-3">
                     <label for="username">Username</label>
                     <input type="text" class="form-control" id="username" name="username" required>
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="email">Email</label>
                     <input type="email" class="form-control" id="email" name="email" required>
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="review">Review</label>
                     <textarea class="form-control" id="review" name="review" rows="4" required></textarea>
-                </div>
+                </div><input type="hidden" name="csrfToken" id="csrfToken" />
                 <button type="submit" class="btn btn-primary">Send</button>
             </form>
         </div>

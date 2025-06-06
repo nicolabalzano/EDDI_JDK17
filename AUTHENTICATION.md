@@ -573,6 +573,82 @@ curl -X POST http://localhost:7070/signup \
 curl http://localhost:7070/auth/csrf-token
 ```
 
+## Content Security Policy (CSP) Configuration
+
+The EDDI application includes comprehensive CSP protection to prevent XSS attacks, code injection, and other client-side vulnerabilities.
+
+### CSP Features
+
+- **Automatic Headers**: CSP headers are automatically added to all successful HTTP responses
+- **Configurable Policy**: Easily customizable through application properties  
+- **Report-Only Mode**: Test CSP policies without blocking content
+- **Additional Security Headers**: Includes complementary security headers
+
+### Configuration
+
+```properties
+# Enable/disable CSP headers
+quarkus.http.security.csp.enabled=true
+
+# CSP policy configuration
+quarkus.http.security.csp.policy=default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ws: wss:; object-src 'none'; frame-src 'none'; form-action 'self'; base-uri 'self'
+
+# Report-only mode (for testing)
+quarkus.http.security.csp.report-only=false
+
+# Additional security headers
+quarkus.http.security.additional-headers.enabled=true
+```
+
+### Default Policy Breakdown
+
+- **default-src 'self'**: Allow content only from the same origin
+- **script-src**: Allow scripts from self, inline scripts, and trusted CDNs
+- **style-src**: Allow styles from self, inline styles, and Google Fonts
+- **img-src**: Allow images from self, data URLs, and HTTPS sources
+- **font-src**: Allow fonts from self and trusted font providers
+- **connect-src**: Allow connections to self and WebSocket protocols
+- **object-src 'none'**: Block all plugins and embedded objects
+- **frame-src 'none'**: Block all iframes to prevent clickjacking
+- **form-action 'self'**: Allow form submissions only to same origin
+- **base-uri 'self'**: Restrict base element to same origin
+
+### Additional Security Headers
+
+When `quarkus.http.security.additional-headers.enabled=true`, the following headers are automatically added:
+
+- **X-Content-Type-Options: nosniff** - Prevents MIME type sniffing
+- **X-Frame-Options: DENY** - Prevents clickjacking (backup for CSP)
+- **X-XSS-Protection: 1; mode=block** - Enables XSS filtering in legacy browsers
+- **Referrer-Policy: strict-origin-when-cross-origin** - Controls referrer information
+- **Permissions-Policy** - Restricts access to browser features
+
+### Customizing CSP Policy
+
+For production environments, customize the CSP policy based on your application's specific needs:
+
+```properties
+# Stricter policy for production
+quarkus.http.security.csp.policy=default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; form-action 'self'; base-uri 'self'; upgrade-insecure-requests
+```
+
+### Testing CSP Configuration
+
+1. **Enable Report-Only Mode**
+   ```properties
+   quarkus.http.security.csp.report-only=true
+   ```
+
+2. **Monitor Browser Console**
+   - Check browser developer tools for CSP violations
+   - Review console warnings and errors
+
+3. **Validate Headers**
+   ```bash
+   # Check CSP headers in response
+   curl -I http://localhost:7070/auth/login
+   ```
+
 ## Troubleshooting
 
 ### Common Issues
