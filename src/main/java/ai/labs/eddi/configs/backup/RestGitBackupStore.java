@@ -9,37 +9,56 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Properties;
 
-public class RestGitBackupStore implements IGitBackupStore {
-    private final String gitSettingsPath = System.getProperty("user.dir") + "/gitsettings/";
+public class RestGitBackupStore implements IGitBackupStore {    private final String gitSettingsPath = System.getProperty("user.dir") + "/gitsettings/";
     private static final String ENV_AES_KEY = "EDDI_GIT_AES_KEY";
-    private static final String ENV_AES_IV = "EDDI_GIT_AES_IV";
-    private static final org.jboss.logging.Logger log = org.jboss.logging.Logger.getLogger(RestGitBackupStore.class);
-
-    private String encrypt(String value) throws Exception {
+    private static final org.jboss.logging.Logger log = org.jboss.logging.Logger.getLogger(RestGitBackupStore.class);private String encrypt(String value) throws Exception {
         String key = System.getenv(ENV_AES_KEY);
-        String iv = System.getenv(ENV_AES_IV);
-        if (key == null || iv == null) throw new IllegalStateException("AES key/IV not set in environment variables");
+        if (key == null) throw new IllegalStateException("AES key not set in environment variables");
+        
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         SecretKeySpec secretKey = new SecretKeySpec(Base64.getDecoder().decode(key), "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(Base64.getDecoder().decode(iv));
+        
+        // Generate a random IV for each encryption operation
+        byte[] ivBytes = new byte[16]; // AES block size
+        SecureRandom.getInstanceStrong().nextBytes(ivBytes);
+        IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+        
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
         byte[] encrypted = cipher.doFinal(value.getBytes("UTF-8"));
-        return Base64.getEncoder().encodeToString(encrypted);
-    }
-
-    private String decrypt(String encrypted) throws Exception {
+        
+        // Concatenate IV + ciphertext and encode in Base64
+        byte[] result = new byte[ivBytes.length + encrypted.length];
+        System.arraycopy(ivBytes, 0, result, 0, ivBytes.length);
+        System.arraycopy(encrypted, 0, result, ivBytes.length, encrypted.length);
+        
+        return Base64.getEncoder().encodeToString(result);
+    }    private String decrypt(String encrypted) throws Exception {
         String key = System.getenv(ENV_AES_KEY);
-        String iv = System.getenv(ENV_AES_IV);
-        if (key == null || iv == null) throw new IllegalStateException("AES key/IV not set in environment variables");
+        if (key == null) throw new IllegalStateException("AES key not set in environment variables");
+        
+        byte[] encryptedData = Base64.getDecoder().decode(encrypted);
+        
+        // Check minimum length (IV + at least some ciphertext)
+        if (encryptedData.length < 32) { // 16 bytes IV + at least 16 bytes ciphertext
+            throw new IllegalArgumentException("Encrypted data too short");
+        }
+        
+        // Extract IV from first 16 bytes
+        byte[] ivBytes = new byte[16];
+        byte[] ciphertext = new byte[encryptedData.length - 16];
+        System.arraycopy(encryptedData, 0, ivBytes, 0, 16);
+        System.arraycopy(encryptedData, 16, ciphertext, 0, ciphertext.length);
+        
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         SecretKeySpec secretKey = new SecretKeySpec(Base64.getDecoder().decode(key), "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(Base64.getDecoder().decode(iv));
+        IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+        
         cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
-        byte[] decoded = Base64.getDecoder().decode(encrypted);
-        return new String(cipher.doFinal(decoded), "UTF-8");
+        return new String(cipher.doFinal(ciphertext), "UTF-8");
     }
 
     @Override

@@ -14,6 +14,7 @@ services:
       - MONGODB_DATABASE=${MONGO_DB_NAME}
       - SQLITE_DB_PATH=/shared/reviews.db
       - SQLITE_PASSWORD=${SQLITE_PASSWORD}
+      - EDDI_GIT_AES_KEY=${EDDI_GIT_AES_KEY}
     depends_on:
       - mongodb
       - sqlite-db
