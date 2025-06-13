@@ -15,6 +15,8 @@ Documentation: [here](https://docs.labs.ai/)
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2c5d183d4bd24dbaa77427cfbf5d4074)](https://www.codacy.com/gh/labsai/EDDI/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=labsai/EDDI&amp;utm_campaign=Badge_Grade) [![CircleCI](https://circleci.com/gh/labsai/EDDI/tree/main.svg?style=svg)](https://circleci.com/gh/labsai/EDDI/tree/main)
 
+
+
 ## Intro
 
 E.D.D.I is a highly scalable and enterprise-certified cloud-native chatbot middleware
@@ -42,82 +44,24 @@ technical spec:
 * OAuth 2.0 (Keycloak) for authentication and user management
 * HTML, CSS, Javascript (Dashboard & Basic Chat UI)
 
-## Prerequirements
+# What we have done
+We perfom a vulnerabilty assessment and penestration testing over this project forked by https://github.com/labsai/EDDI/ 
 
-* Java 17
-* Maven 3.8.4
-* MongoDB > 4.0
+# Security Assessment Summary
 
-## How to run the project
+This repository contains the results and documentation of a vulnerability assessment and penetration testing activity performed on the E.D.D.I. project.
+You can found the discovered vulnerability in the [presentation](https://github.com/nicolabalzano/EDDI_JDK17/blob/main/va_pt_EDDI_presentation.pdf) or in [report](https://github.com/nicolabalzano/EDDI_JDK17/blob/main/va_pt_EDDI_report.pdf).
 
-1. Setup a local mongodb \(&gt; v4.0\)
-2. On a terminal, under project root folder, run the following command:
+## Scope
+- Source code review (Java, Quarkus, JS, HTML)
+- Static and dynamic analysis (Fortify, ZAP and Burpsuite)
+- Manual and automated vulnerability testing
 
-```shell script
-./mvnw compile quarkus:dev
-```
+## How to Run Securely
+- Set the `EDDI_GIT_AES_KEY` environment variable for encryption.
+- Use Docker or Kubernetes for isolated deployment.
+- Access the dashboard at [http://localhost:7070](http://localhost:7070)
 
-3. Go to Browser --&gt; [http://localhost:7070](http://localhost:7070)
+For more details, see the `SECURITY.md` and `CRYPTO_MIGRATION.md` files.
 
-Note: If running locally inside an IDE you need _lombok_ to be enabled \(otherwise you will get compile errors
-complaining about missing constructors\). Either download as plugin \(e.g. inside Intellij\) or follow instructions
-here [https://projectlombok.org/](https://projectlombok.org/
-
-## Build App & Docker image
-
-```bash
-./mvnw clean package '-Dquarkus.container-image.build=true'
-```
-
-## Download from Docker hub registry
-
-```bash
-docker pull labsai/eddi
-```
-
-[https://hub.docker.com/r/labsai/eddi](https://hub.docker.com/r/labsai/eddi)
-
-## Run Docker image
-
-For production, launch standalone mongodb and then start an eddi instance as defined in the docker-compose file
-
-```bash
-docker-compose up
-```
-
-For development, use
-
-```bash
-docker-compose -f docker-compose.yml -f docker-compose.local.yml up
-```
-
-For integration testing run
-
-```bash
-./integration-tests.sh
-```
-
-or
-
-```bash
-docker-compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.testing.yml -p ci up -d
-```
-
-## prometheus/metrics integration
-
-
-```bash
-<eddi-instance>/q/metrics
-```
-
-## kubernetes integration
-
-Liveness endpoint:
-```bash
-<eddi-instance>/q/health/live
-```
-
-Readiness endpoint:
-```bash
-<eddi-instance>/q/health/ready
-```
+---
