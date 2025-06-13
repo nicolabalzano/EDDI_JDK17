@@ -57,11 +57,41 @@ You can found the discovered vulnerability in the [presentation](https://github.
 - Static and dynamic analysis (Fortify, ZAP and Burpsuite)
 - Manual and automated vulnerability testing
 
-## How to Run Securely
-- Set the `EDDI_GIT_AES_KEY` environment variable for encryption.
-- Use Docker or Kubernetes for isolated deployment.
-- Access the dashboard at [http://localhost:7070](http://localhost:7070)
+## Use
 
-For more details, see the `SECURITY.md` and `CRYPTO_MIGRATION.md` files.
+To run the project:
 
----
+1. Create a .env file:
+    ```sh
+    # Database Configuration
+    MONGO_INITDB_ROOT_USERNAME=admin
+    MONGO_INITDB_ROOT_PASSWORD=vHdRkU&WqHK9j2mhJYre8LJrYxUKX8sq^fHRGajw
+    MONGO_INITDB_ROOT_PASSWORD_ENCODED=vHdRkU%26WqHK9j2mhJYre8LJrYxUKX8sq%5EfHRGajw
+    MONGO_DB_NAME=eddi
+
+    # SQLite Configuration (for additional security)  
+    SQLITE_PASSWORD=yebL79QjafE3cyfQ8dCKt3KjLVXybyAwunT
+
+    # Application Configuration
+    QUARKUS_PROFILE=prod
+
+    # Key for AES encryption
+    EDDI_GIT_AES_KEY=humoy+xPzLIZ5XzAMyW3koTDy8bWlHfFcO6OV03zdU8GLqovJeT80is/Fmhmrd8d
+
+    ```
+
+2. Build the project:
+   
+   ```sh
+   mvn clean compile
+
+   ./mvnw clean package
+   ```
+
+3. Start the Docker containers:
+   
+   ```sh
+   docker compose up --build
+   ```
+
+4. Once started, access the application at [localhost:7070](http://localhost:7070)
